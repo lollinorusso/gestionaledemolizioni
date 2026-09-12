@@ -61,6 +61,7 @@
         </div>
     </div>
 
+    <!-- Sidebar Navigation -->
     <aside class="w-72 bg-slate-900 text-white flex flex-col transition-all duration-300 shadow-2xl z-20">
         <div class="p-6 border-b border-slate-800 flex items-center gap-3">
             <div class="w-10 h-10 bg-amber-500 text-slate-950 rounded-xl flex items-center justify-center shadow-md font-bold">
@@ -107,6 +108,7 @@
 
     <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-100">
         
+        <!-- INVENTORY VIEW -->
         <div id="inventoryView" class="flex flex-col h-full w-full">
             <header class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center z-10 shadow-xs">
                 <div>
@@ -195,6 +197,7 @@
             </div>
         </div>
 
+        <!-- HISTORY VIEW (Admin Only) -->
         <div id="historyView" class="hidden flex-col h-full w-full bg-slate-100 overflow-hidden">
             <header class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center shadow-xs">
                 <div>
@@ -255,6 +258,7 @@
 
     </main>
 
+    <!-- Modal Add/Edit Item -->
     <div id="addModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden z-50 flex items-center justify-center opacity-0 transition-opacity duration-300 p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300 border border-slate-100" id="modalContent">
             
@@ -340,8 +344,8 @@
                             <input type="text" id="itemLocation" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium" placeholder="Es. Scaffale A, Rip 3">
                         </div>
 
-                        <!-- E-commerce Toggle -->
-                        <div class="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs">
+                        <!-- E-commerce Toggle & Image Picker -->
+                        <div class="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs space-y-3">
                             <label class="flex items-center justify-between cursor-pointer">
                                 <div>
                                     <span class="block font-semibold text-slate-800 text-sm">Pubblica sul Sito</span>
@@ -354,12 +358,15 @@
                                 </div>
                             </label>
                             
-                            <div class="mt-3.5 space-y-2">
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Immagine Articolo</label>
-                                <!-- File Upload from device -->
-                                <input type="file" id="imageFileInput" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer" onchange="handleImageUpload(event)">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Carica Foto dal Dispositivo</label>
+                                <input type="file" id="imageFileInput" accept="image/*" onchange="handleImageUpload(event)" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer">
                                 <input type="hidden" id="itemImage">
-                                <input type="text" id="itemImageText" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium" placeholder="Oppure inserisci URL immagine...">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">O URL Immagine Esterna</label>
+                                <input type="text" id="itemImageUrl" oninput="document.getElementById('itemImage').value=this.value" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium" placeholder="https://...">
                             </div>
                         </div>
 
@@ -522,7 +529,10 @@
                     
                     renderTable();
                     updateStats();
-                }, (error) => console.error("Inventory error", error));
+                }, (error) => {
+                    console.error("Inventory error", error);
+                    showToast("Errore di caricamento dati dal database.", "red");
+                });
 
                 if (currentUserRole === 'admin') {
                     const salesRef = collection(db, 'artifacts', appId, 'public', 'data', 'sales');
@@ -543,7 +553,7 @@
 
             } catch(e) {
                 console.error(e);
-                showToast("Errore di connessione al database.", "red");
+                showToast("Errore di autenticazione Firebase. Verifica le regole Firestore.", "red");
             }
         }
 
@@ -704,23 +714,25 @@
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
-                const base64String = e.target.result;
-                document.getElementById('itemImage').value = base64String;
-                document.getElementById('itemImageText').value = "[Immagine caricata dal dispositivo]";
-                showToast('Immagine caricata correttamente!');
+                document.getElementById('itemImage').value = e.target.result;
+                document.getElementById('itemImageUrl').value = '';
+                showToast('Foto caricata dal dispositivo!');
             };
             reader.readAsDataURL(file);
         };
 
         window.saveItem = async function(e) {
             if(e) e.preventDefault();
-            if(!auth.currentUser) return;
+            if(!auth.currentUser) {
+                showToast('Autenticazione in corso, riprova tra un secondo.', 'red');
+                return;
+            }
 
             const id = document.getElementById('itemId').value;
-            let imgVal = document.getElementById('itemImage').value;
-            const textVal = document.getElementById('itemImageText').value;
-            if(!imgVal && textVal && textVal.startsWith('http')) {
-                imgVal = textVal;
+            let finalImage = document.getElementById('itemImage').value;
+            const urlInput = document.getElementById('itemImageUrl').value;
+            if(!finalImage && urlInput) {
+                finalImage = urlInput;
             }
 
             const itemData = {
@@ -733,7 +745,7 @@
                 price: parseFloat(document.getElementById('itemPrice').value),
                 qty: parseInt(document.getElementById('itemQty').value),
                 isOnline: document.getElementById('itemOnline').checked,
-                image: imgVal,
+                image: finalImage,
                 notes: document.getElementById('itemNotes').value,
                 lastUpdatedBy: currentUserName,
             };
@@ -751,7 +763,7 @@
                 closeModal('addModal');
             } catch(err) {
                 console.error(err);
-                showToast('Errore durante il salvataggio.', 'red');
+                showToast('Errore di scrittura su Firebase. Controlla le regole.', 'red');
             }
         };
 
@@ -771,7 +783,11 @@
             document.getElementById('itemLocation').value = item.location || '';
             document.getElementById('itemOnline').checked = item.isOnline || false;
             document.getElementById('itemImage').value = item.image || '';
-            document.getElementById('itemImageText').value = item.image || '';
+            if(item.image && item.image.startsWith('http')) {
+                document.getElementById('itemImageUrl').value = item.image;
+            } else {
+                document.getElementById('itemImageUrl').value = '';
+            }
             document.getElementById('itemNotes').value = item.notes || '';
 
             openModal('addModal');
@@ -836,7 +852,7 @@
                 form.reset();
                 document.getElementById('itemId').value = '';
                 document.getElementById('itemImage').value = '';
-                document.getElementById('itemImageText').value = '';
+                document.getElementById('itemImageUrl').value = '';
             }
             modal.classList.remove('hidden');
             void modal.offsetWidth;
@@ -854,7 +870,7 @@
                 form.reset();
                 document.getElementById('itemId').value = '';
                 document.getElementById('itemImage').value = '';
-                document.getElementById('itemImageText').value = '';
+                document.getElementById('itemImageUrl').value = '';
             }, 300);
         };
 
