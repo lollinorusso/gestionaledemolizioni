@@ -624,7 +624,6 @@
             document.getElementById('totalSoldItems').textContent = salesHistory.length;
         }
 
-        // Funzione per svuotare lo storico vendite
         window.clearSalesHistory = async function() {
             if(currentUserRole !== 'admin') return;
             if(confirm("Vuoi davvero azzerare lo storico delle vendite e gli incassi totali?")) {
