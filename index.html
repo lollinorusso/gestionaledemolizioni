@@ -78,9 +78,9 @@
                 <i class="ph ph-package text-xl"></i>
                 Gestione Inventario
             </a>
-            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800/60 hover:text-white rounded-xl font-medium transition-all opacity-60 cursor-not-allowed">
-                <i class="ph ph-shopping-cart text-xl"></i>
-                Ordini E-commerce
+            <a href="#" onclick="openEcommerceSite()" class="nav-item flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800/60 hover:text-white rounded-xl font-medium transition-all">
+                <i class="ph ph-globe text-xl"></i>
+                Vai al Sito E-commerce
             </a>
             <a href="#" onclick="switchView('history')" id="nav-history" class="nav-item hidden items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800/60 hover:text-white rounded-xl font-medium transition-all">
                 <i class="ph ph-chart-line-up text-xl"></i>
@@ -507,6 +507,12 @@
             document.getElementById('adminPasswordInput').value = '';
             document.getElementById('employeeNameInput').value = '';
             document.getElementById('loginOverlay').classList.remove('hidden');
+        };
+
+        // Funzione per aprire il sito e-commerce pubblico in una nuova scheda
+        window.openEcommerceSite = function() {
+            // Sostituisci questo URL con il link effettivo del tuo sito e-commerce pubblico se diverso
+            window.open('https://github.com', '_blank');
         };
 
         async function initFirebaseData() {
