@@ -39,7 +39,6 @@
                         <i class="ph ph-lock-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
                         <input type="password" id="adminPasswordInput" required placeholder="Inserisci password..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-sm font-medium">
                     </div>
-                    <p class="text-xs text-slate-400 mt-1.5">Password di prova: <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-slate-600">admin123</code></p>
                 </div>
                 <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-3.5 rounded-xl font-semibold transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2">
                     <i class="ph ph-shield-check text-xl"></i> Accedi come Admin
@@ -62,7 +61,6 @@
         </div>
     </div>
 
-    <!-- Sidebar Navigation -->
     <aside class="w-72 bg-slate-900 text-white flex flex-col transition-all duration-300 shadow-2xl z-20">
         <div class="p-6 border-b border-slate-800 flex items-center gap-3">
             <div class="w-10 h-10 bg-amber-500 text-slate-950 rounded-xl flex items-center justify-center shadow-md font-bold">
@@ -109,12 +107,11 @@
 
     <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-100">
         
-        <!-- INVENTORY VIEW -->
         <div id="inventoryView" class="flex flex-col h-full w-full">
             <header class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center z-10 shadow-xs">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Catalogo Ricambi</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Gestisci la disponibilità e la pubblicazione sul "sito samu"</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Gestisci la disponibilità e la pubblicazione sul sito e-commerce</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <button onclick="openModal('addModal')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 transition-all shadow-md shadow-amber-500/15 active:scale-95">
@@ -198,7 +195,6 @@
             </div>
         </div>
 
-        <!-- HISTORY VIEW (Admin Only) -->
         <div id="historyView" class="hidden flex-col h-full w-full bg-slate-100 overflow-hidden">
             <header class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center shadow-xs">
                 <div>
@@ -259,7 +255,6 @@
 
     </main>
 
-    <!-- Modal Add/Edit Item -->
     <div id="addModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden z-50 flex items-center justify-center opacity-0 transition-opacity duration-300 p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300 border border-slate-100" id="modalContent">
             
@@ -349,8 +344,8 @@
                         <div class="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs">
                             <label class="flex items-center justify-between cursor-pointer">
                                 <div>
-                                    <span class="block font-semibold text-slate-800 text-sm">Pubblica sul "sito samu"</span>
-                                    <span class="text-xs text-slate-400">Rende acquistabile nell'e-commerce pubblico.</span>
+                                    <span class="block font-semibold text-slate-800 text-sm">Pubblica sul Sito</span>
+                                    <span class="text-xs text-slate-400">Rende acquistabile nell'e-commerce.</span>
                                 </div>
                                 <div class="relative">
                                     <input type="checkbox" id="itemOnline" class="sr-only peer">
@@ -359,9 +354,12 @@
                                 </div>
                             </label>
                             
-                            <div class="mt-3.5">
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">URL Immagine</label>
-                                <input type="text" id="itemImage" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium" placeholder="https://...">
+                            <div class="mt-3.5 space-y-2">
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Immagine Articolo</label>
+                                <!-- File Upload from device -->
+                                <input type="file" id="imageFileInput" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer" onchange="handleImageUpload(event)">
+                                <input type="hidden" id="itemImage">
+                                <input type="text" id="itemImageText" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium" placeholder="Oppure inserisci URL immagine...">
                             </div>
                         </div>
 
@@ -393,7 +391,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CONFIGURAZIONE CONDIVISA CON "SITO SAMU"
+        // Configurazione Firebase condivisa con "sito samu"
         const appId = 'sito-samu'; 
         const firebaseConfig = {
             apiKey: "AIzaSyDMWLVIVhBXJqAKFlDhZPcac8gaJFUKq6Q",
@@ -450,7 +448,7 @@
         window.handleAdminLogin = async function(e) {
             e.preventDefault();
             const pwd = document.getElementById('adminPasswordInput').value;
-            if(pwd === 'admin123' || pwd === 'demolizioni2026') {
+            if(pwd === 'limardi24') {
                 await selectRole('admin', 'Amministratore Principale');
             } else {
                 showToast('Password amministratore non corretta!', 'red');
@@ -636,7 +634,7 @@
                 tr.className = `border-b border-slate-100 transition-colors ${rowClass}`;
                 tr.innerHTML = `
                     <td class="py-3.5 px-5"><span class="font-mono text-xs font-bold bg-slate-100 px-2.5 py-1 rounded-lg text-slate-700 border border-slate-200/60">${item.code || '-'}</span></td>
-                    <td class="py-3.5 px-5"><img src="${imgSrc}" class="w-10 h-10 rounded-xl object-cover border border-slate-200 bg-white"></td>
+                    <td class="py-3.5 px-5"><img src="${imgSrc}" class="w-10 h-10 rounded-xl object-cover border border-slate-200 bg-white" onerror="this.src='${imgPlaceholder}'"></td>
                     <td class="py-3.5 px-5">
                         <div class="font-semibold text-slate-900">${item.name || '-'}</div>
                         <div class="text-xs text-slate-500 font-medium">${item.compatibility || '-'}</div>
@@ -701,11 +699,30 @@
             }
         }
 
+        window.handleImageUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64String = e.target.result;
+                document.getElementById('itemImage').value = base64String;
+                document.getElementById('itemImageText').value = "[Immagine caricata dal dispositivo]";
+                showToast('Immagine caricata correttamente!');
+            };
+            reader.readAsDataURL(file);
+        };
+
         window.saveItem = async function(e) {
             if(e) e.preventDefault();
             if(!auth.currentUser) return;
 
             const id = document.getElementById('itemId').value;
+            let imgVal = document.getElementById('itemImage').value;
+            const textVal = document.getElementById('itemImageText').value;
+            if(!imgVal && textVal && textVal.startsWith('http')) {
+                imgVal = textVal;
+            }
+
             const itemData = {
                 code: document.getElementById('itemCode').value.toUpperCase(),
                 name: document.getElementById('itemName').value,
@@ -716,7 +733,7 @@
                 price: parseFloat(document.getElementById('itemPrice').value),
                 qty: parseInt(document.getElementById('itemQty').value),
                 isOnline: document.getElementById('itemOnline').checked,
-                image: document.getElementById('itemImage').value,
+                image: imgVal,
                 notes: document.getElementById('itemNotes').value,
                 lastUpdatedBy: currentUserName,
             };
@@ -754,6 +771,7 @@
             document.getElementById('itemLocation').value = item.location || '';
             document.getElementById('itemOnline').checked = item.isOnline || false;
             document.getElementById('itemImage').value = item.image || '';
+            document.getElementById('itemImageText').value = item.image || '';
             document.getElementById('itemNotes').value = item.notes || '';
 
             openModal('addModal');
@@ -817,6 +835,8 @@
                 document.getElementById('modalTitle').textContent = 'Aggiungi Nuovo Ricambio';
                 form.reset();
                 document.getElementById('itemId').value = '';
+                document.getElementById('itemImage').value = '';
+                document.getElementById('itemImageText').value = '';
             }
             modal.classList.remove('hidden');
             void modal.offsetWidth;
@@ -833,6 +853,8 @@
                 modal.classList.add('hidden');
                 form.reset();
                 document.getElementById('itemId').value = '';
+                document.getElementById('itemImage').value = '';
+                document.getElementById('itemImageText').value = '';
             }, 300);
         };
 
