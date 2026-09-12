@@ -78,7 +78,7 @@
                 <i class="ph ph-package text-xl"></i>
                 Gestione Inventario
             </a>
-            <a href="#" onclick="openEcommerceSite()" class="nav-item flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800/60 hover:text-white rounded-xl font-medium transition-all">
+            <a href="https://lollinorusso.github.io/autodemolizionilimardi/" target="_blank" class="nav-item flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800/60 hover:text-white rounded-xl font-medium transition-all">
                 <i class="ph ph-globe text-xl"></i>
                 Vai al Sito E-commerce
             </a>
@@ -509,12 +509,6 @@
             document.getElementById('loginOverlay').classList.remove('hidden');
         };
 
-        // Funzione per aprire il sito e-commerce pubblico in una nuova scheda
-        window.openEcommerceSite = function() {
-            // Sostituisci questo URL con il link effettivo del tuo sito e-commerce pubblico se diverso
-            window.open('https://github.com', '_blank');
-        };
-
         async function initFirebaseData() {
             try {
                 await signInAnonymously(auth);
@@ -570,7 +564,7 @@
             document.getElementById('historyView').classList.remove('flex-col');
             
             document.querySelectorAll('.nav-item').forEach(el => {
-                if(!el.classList.contains('cursor-not-allowed')) {
+                if(!el.classList.contains('cursor-not-allowed') && !el.getAttribute('target')) {
                     el.classList.remove('bg-amber-500', 'text-slate-950', 'font-semibold');
                     el.classList.add('text-slate-400', 'font-medium');
                 }
@@ -663,7 +657,7 @@
                     <td class="py-3.5 px-5 text-center">${onlineBadge}</td>
                     <td class="py-3.5 px-5">
                         <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="sellItem('${item.id}')" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors" title="Vendi (-1 Q.tà)" ${isOutOfStock ? 'disabled class="opacity-40 cursor-not-allowed"' : ''}><i class="ph ph-currency-eur text-lg"></i></button>
+                            <button onclick="sellItem('${item.id}')" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors" title="Vendi (-1 Q.tà e rimuovi dal sito)" ${isOutOfStock ? 'disabled class="opacity-40 cursor-not-allowed"' : ''}><i class="ph ph-currency-eur text-lg"></i></button>
                             <button onclick="editItem('${item.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors" title="Modifica Articolo"><i class="ph ph-pencil-simple text-lg"></i></button>
                             ${deleteBtn}
                         </div>
@@ -769,7 +763,7 @@
                 closeModal('addModal');
             } catch(err) {
                 console.error(err);
-                showToast('Errore di scrittura su Firebase. Controlla le regole.', 'red');
+                showToast('Errore di scrittura su Firebase.', 'red');
             }
         };
 
@@ -815,8 +809,11 @@
             if (item && item.qty > 0) {
                 try {
                     const newQty = item.qty - 1;
-                    const updates = { qty: newQty, lastUpdatedBy: currentUserName };
-                    if (newQty === 0) updates.isOnline = false;
+                    const updates = { 
+                        qty: newQty, 
+                        isOnline: false, // Rimuove automaticamente dal sito quando venduto
+                        lastUpdatedBy: currentUserName 
+                    };
 
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), updates, { merge: true });
                     
@@ -829,7 +826,7 @@
                         timestamp: serverTimestamp()
                     });
 
-                    showToast(`Vendita registrata da ${currentUserName}! Ricavo: €${item.price.toFixed(2)}`);
+                    showToast(`Vendita registrata da ${currentUserName}! Ricavo: €${item.price.toFixed(2)} (Rimosso dal sito)`);
                 } catch(e) {
                     console.error(e);
                     showToast('Errore durante la registrazione della vendita', 'red');
