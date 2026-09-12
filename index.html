@@ -16,6 +16,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen flex overflow-hidden">
 
+    <!-- Login/Role Selection Overlay -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex flex-col items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full border border-slate-100 animate-in fade-in zoom-in duration-300">
             <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner">
@@ -24,11 +25,13 @@
             <h2 class="text-2xl font-bold text-slate-900 text-center tracking-tight mb-1">Demolizioni<span class="text-amber-500">Gest</span></h2>
             <p class="text-slate-500 text-sm text-center mb-6">Seleziona il tuo profilo di accesso per iniziare.</p>
             
+            <!-- Tab switchers -->
             <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
                 <button type="button" onclick="switchLoginTab('admin')" id="tabAdmin" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition-all">Amministratore</button>
                 <button type="button" onclick="switchLoginTab('employee')" id="tabEmployee" class="flex-1 py-2 text-sm font-medium rounded-lg text-slate-500 hover:text-slate-900 transition-all">Dipendente</button>
             </div>
 
+            <!-- Admin Form -->
             <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Password Amministratore</label>
@@ -42,6 +45,7 @@
                 </button>
             </form>
 
+            <!-- Employee Form -->
             <form id="employeeLoginForm" onsubmit="handleEmployeeLogin(event)" class="space-y-4 hidden">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Nome / Matricola Dipendente</label>
@@ -57,6 +61,7 @@
         </div>
     </div>
 
+    <!-- Sidebar Navigation -->
     <aside class="w-72 bg-slate-900 text-white flex flex-col transition-all duration-300 shadow-2xl z-20">
         <div class="p-6 border-b border-slate-800 flex items-center gap-3">
             <div class="w-10 h-10 bg-amber-500 text-slate-950 rounded-xl flex items-center justify-center shadow-md font-bold">
@@ -103,6 +108,7 @@
 
     <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-100">
         
+        <!-- INVENTORY VIEW -->
         <div id="inventoryView" class="flex flex-col h-full w-full">
             <header class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center z-10 shadow-xs">
                 <div>
@@ -184,6 +190,7 @@
             </div>
         </div>
 
+        <!-- HISTORY VIEW (Admin Only) -->
         <div id="historyView" class="hidden flex-col h-full w-full bg-slate-100 overflow-hidden">
             <header class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center shadow-xs">
                 <div>
@@ -246,6 +253,7 @@
 
     </main>
 
+    <!-- Modal Add/Edit Item -->
     <div id="addModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden z-50 flex items-center justify-center opacity-0 transition-opacity duration-300 p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300 border border-slate-100" id="modalContent">
             
@@ -353,6 +361,7 @@
         </div>
     </div>
 
+    <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 z-50 flex items-center gap-3 border border-slate-800">
         <i class="ph-fill ph-check-circle text-2xl text-emerald-400" id="toastIcon"></i>
         <span id="toastMsg" class="font-semibold text-sm">Operazione completata</span>
