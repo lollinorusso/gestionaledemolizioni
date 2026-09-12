@@ -103,7 +103,6 @@
 
     <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-100">
         
-        <!-- INVENTORY VIEW -->
         <div id="inventoryView" class="flex flex-col h-full w-full">
             <header class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center z-10 shadow-xs">
                 <div>
@@ -468,7 +467,6 @@
         function initFirebaseData() {
             if (!db) return;
 
-            // Ascolta in tempo reale la collezione "ricambi" del sito principale
             onSnapshot(collection(db, 'ricambi'), (snapshot) => {
                 inventory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderTable();
@@ -730,7 +728,7 @@
             } catch(e) { console.error(e); }
         };
 
-        // DECREMENTO CORRETTO DI 1 UNITÀ
+        // Decremento graduale della quantità (-1)
         window.sellItem = async function(id) {
             if(!db) return;
             const item = inventory.find(i => i.id === id);
@@ -740,10 +738,8 @@
                 try {
                     const newQty = currentQty - 1;
                     
-                    // Aggiorna la quantità (se arriva a 0, il sito non lo mostrerà più)
                     await setDoc(doc(db, 'ricambi', id), { qty: newQty }, { merge: true });
                     
-                    // Registra la vendita nello storico contabile
                     await addDoc(collection(db, 'sales_history'), {
                         itemId: item.id,
                         itemCode: item.code || '-',
@@ -790,7 +786,7 @@
             setTimeout(() => {
                 modal.classList.add('hidden');
                 form.reset();
-                document.getElementById('itemId'].value = '';
+                document.getElementById('itemId').value = '';
                 compressedImageBase64 = "";
             }, 300);
         };
