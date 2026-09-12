@@ -475,13 +475,11 @@
                 updateStats();
             }, (error) => console.error("Inventory error", error));
 
-            if (currentUserRole === 'admin') {
-                onSnapshot(collection(db, 'sales_history'), (snapshot) => {
-                    salesHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    salesHistory.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                    renderSalesTable();
-                }, (error) => console.error("Sales error", error));
-            }
+            onSnapshot(collection(db, 'sales_history'), (snapshot) => {
+                salesHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                salesHistory.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                renderSalesTable();
+            }, (error) => console.error("Sales error", error));
         }
 
         window.switchView = function(viewName) {
@@ -556,7 +554,7 @@
                 
                 let onlineBadge = isOutOfStock ? 
                     `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700"><i class="ph-fill ph-x-circle"></i> Esaurito / Venduto</span>` :
-                    `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700"><i class="ph-fill ph-globe"></i> Sul Sito</span>`;
+                    `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700"><i class="ph-fill ph-globe"></i> Sul Sito (${qty} disp.)</span>`;
 
                 const imgPlaceholder = `https://placehold.co/60x60/e2e8f0/475569?text=RIC`;
                 const imgSrc = item.image || imgPlaceholder;
@@ -581,7 +579,7 @@
                     <td class="py-3.5 px-5 text-center">${onlineBadge}</td>
                     <td class="py-3.5 px-5">
                         <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="sellItem('${item.id}')" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors" title="Vendi (-1 Q.tà e rimuovi dal sito)" ${isOutOfStock ? 'disabled class="opacity-40 cursor-not-allowed"' : ''}><i class="ph ph-currency-eur text-lg"></i></button>
+                            <button onclick="sellItem('${item.id}')" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors" title="Vendi 1 pezzo (-1 Q.tà)" ${isOutOfStock ? 'disabled class="opacity-40 cursor-not-allowed"' : ''}><i class="ph ph-currency-eur text-lg"></i></button>
                             <button onclick="editItem('${item.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors" title="Modifica Articolo"><i class="ph ph-pencil-simple text-lg"></i></button>
                             ${deleteBtn}
                         </div>
@@ -732,14 +730,20 @@
             } catch(e) { console.error(e); }
         };
 
+        // DECREMENTO CORRETTO DI 1 UNITÀ
         window.sellItem = async function(id) {
             if(!db) return;
             const item = inventory.find(i => i.id === id);
             const currentQty = item.qty !== undefined ? item.qty : 1;
+            
             if (item && currentQty > 0) {
                 try {
-                    await setDoc(doc(db, 'ricambi', id), { qty: 0 }, { merge: true });
+                    const newQty = currentQty - 1;
                     
+                    // Aggiorna la quantità (se arriva a 0, il sito non lo mostrerà più)
+                    await setDoc(doc(db, 'ricambi', id), { qty: newQty }, { merge: true });
+                    
+                    // Registra la vendita nello storico contabile
                     await addDoc(collection(db, 'sales_history'), {
                         itemId: item.id,
                         itemCode: item.code || '-',
@@ -749,7 +753,7 @@
                         timestamp: serverTimestamp()
                     });
 
-                    showToast(`Vendita registrata da ${currentUserName}! Rimosso dal sito.`);
+                    showToast(`Vendita registrata da ${currentUserName}! Q.tà rimanente: ${newQty}`);
                 } catch(e) {
                     console.error(e);
                     showToast('Errore durante la registrazione della vendita', 'red');
@@ -786,7 +790,7 @@
             setTimeout(() => {
                 modal.classList.add('hidden');
                 form.reset();
-                document.getElementById('itemId').value = '';
+                document.getElementById('itemId'].value = '';
                 compressedImageBase64 = "";
             }, 300);
         };
