@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pannello Inventario Demolizioni - Gestione & E-commerce</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,58 +11,65 @@
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        /* Custom Scrollbar for better mobile feel */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen flex flex-col md:flex-row overflow-hidden">
 
     <!-- Login/Role Selection Overlay -->
-    <div id="loginOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex flex-col items-center justify-center p-4">
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[100] flex flex-col items-center justify-center p-4">
         <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full border border-slate-100 animate-in fade-in zoom-in duration-300">
             <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner">
                 <i class="ph-fill ph-car-profile text-3xl"></i>
             </div>
             <h2 class="text-2xl font-bold text-slate-900 text-center tracking-tight mb-1">Demolizioni<span class="text-amber-500">Gest</span></h2>
-            <p class="text-slate-500 text-sm text-center mb-6">Seleziona il tuo profilo di accesso per iniziare.</p>
+            <p class="text-slate-500 text-sm text-center mb-6">Seleziona il tuo profilo di accesso.</p>
             
             <!-- Tab switchers -->
             <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
-                <button type="button" onclick="switchLoginTab('admin')" id="tabAdmin" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition-all">Amministratore</button>
+                <button type="button" onclick="switchLoginTab('admin')" id="tabAdmin" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition-all">Admin</button>
                 <button type="button" onclick="switchLoginTab('employee')" id="tabEmployee" class="flex-1 py-2 text-sm font-medium rounded-lg text-slate-500 hover:text-slate-900 transition-all">Dipendente</button>
             </div>
 
             <!-- Admin Form -->
             <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Password Amministratore</label>
                     <div class="relative">
                         <i class="ph ph-lock-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="password" id="adminPasswordInput" required placeholder="Inserisci password..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-sm font-medium">
+                        <input type="password" id="adminPasswordInput" required placeholder="Password Amministratore" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-sm font-medium">
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-3.5 rounded-xl font-semibold transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2">
-                    <i class="ph ph-shield-check text-xl"></i> Accedi come Admin
+                    <i class="ph ph-shield-check text-xl"></i> Accedi
                 </button>
             </form>
 
             <!-- Employee Form -->
             <form id="employeeLoginForm" onsubmit="handleEmployeeLogin(event)" class="space-y-4 hidden">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Nome / Matricola Dipendente</label>
                     <div class="relative">
                         <i class="ph ph-user-circle absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="text" id="employeeNameInput" required placeholder="Es. Marco Rossi (Officina)" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-sm font-medium">
+                        <input type="text" id="employeeNameInput" required placeholder="Nome Dipendente (Es. Marco)" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-sm font-medium">
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 p-3.5 rounded-xl font-semibold transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2">
-                    <i class="ph ph-wrench text-xl"></i> Accedi in Officina
+                    <i class="ph ph-wrench text-xl"></i> Entra in Officina
                 </button>
             </form>
         </div>
     </div>
 
     <!-- Mobile Header Bar -->
-    <div class="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between z-20 shrink-0">
+    <div class="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between z-40 shrink-0 shadow-md relative">
         <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 bg-amber-500 text-slate-950 rounded-lg flex items-center justify-center font-bold text-sm">
                 <i class="ph-fill ph-car-profile"></i>
@@ -75,27 +82,32 @@
     </div>
 
     <!-- Sidebar Navigation -->
-    <aside id="sidebarNav" class="fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 md:static w-72 bg-slate-900 text-white flex flex-col transition-all duration-300 shadow-2xl z-40">
+    <aside id="sidebarNav" class="fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 md:static w-64 lg:w-72 bg-slate-900 text-white flex flex-col transition-transform duration-300 shadow-2xl z-50 md:z-auto pt-14 md:pt-0">
+        <!-- Close button for mobile inside sidebar -->
+        <button onclick="toggleMobileMenu()" class="md:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-white">
+            <i class="ph ph-x text-2xl"></i>
+        </button>
+
         <div class="p-6 border-b border-slate-800 hidden md:flex items-center gap-3">
             <div class="w-10 h-10 bg-amber-500 text-slate-950 rounded-xl flex items-center justify-center shadow-md font-bold">
                 <i class="ph-fill ph-car-profile text-2xl"></i>
             </div>
             <div>
                 <h1 class="font-bold text-lg leading-tight tracking-tight">Demolizioni<span class="text-amber-500">Gest</span></h1>
-                <p class="text-xs text-slate-400 font-medium">Magazzino & E-commerce Hub</p>
+                <p class="text-xs text-slate-400 font-medium">Magazzino & E-commerce</p>
             </div>
         </div>
 
-        <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto mt-2 md:mt-0">
-            <a href="#" onclick="switchView('inventory')" id="nav-inventory" class="nav-item flex items-center gap-3 px-4 py-3 bg-amber-500 text-slate-950 rounded-xl font-semibold transition-all shadow-sm">
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto mt-2 md:mt-0">
+            <a href="#" onclick="switchView('inventory')" id="nav-inventory" class="nav-item flex items-center gap-3 px-4 py-3.5 md:py-3 bg-amber-500 text-slate-950 rounded-xl font-semibold transition-all shadow-sm">
                 <i class="ph ph-package text-xl"></i>
                 Gestione Inventario
             </a>
-            <a href="https://lollinorusso.github.io/autodemolizionilimardi/" target="_blank" class="nav-item flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800/60 hover:text-white rounded-xl font-medium transition-all">
+            <a href="https://lollinorusso.github.io/autodemolizionilimardi/" target="_blank" class="nav-item flex items-center gap-3 px-4 py-3.5 md:py-3 text-slate-400 hover:bg-slate-800/60 hover:text-white rounded-xl font-medium transition-all">
                 <i class="ph ph-globe text-xl"></i>
-                Vai al Sito E-commerce
+                Sito E-commerce
             </a>
-            <a href="#" onclick="switchView('history')" id="nav-history" class="nav-item hidden items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800/60 hover:text-white rounded-xl font-medium transition-all">
+            <a href="#" onclick="switchView('history')" id="nav-history" class="nav-item hidden items-center gap-3 px-4 py-3.5 md:py-3 text-slate-400 hover:bg-slate-800/60 hover:text-white rounded-xl font-medium transition-all">
                 <i class="ph ph-chart-line-up text-xl"></i>
                 Statistiche e Storico
             </a>
@@ -112,94 +124,96 @@
                         <p class="text-xs text-slate-400 flex items-center gap-1 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span id="currentUserRoleBadge">Offline</span></p>
                     </div>
                 </div>
-                <button onclick="logout()" class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors" title="Cambia Utente / Esci">
+                <button onclick="logout()" class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors" title="Esci">
                     <i class="ph ph-sign-out text-lg"></i>
                 </button>
             </div>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-[calc(100vh-57px)] md:h-full overflow-hidden bg-slate-100">
+    <!-- Overlay scuro per chiudere il menu mobile cliccando fuori -->
+    <div id="mobileMenuOverlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
+    <main class="flex-1 flex flex-col h-[calc(100vh-56px)] md:h-full overflow-hidden bg-slate-100 relative">
         
         <!-- INVENTORY VIEW -->
         <div id="inventoryView" class="flex flex-col h-full w-full">
-            <header class="bg-white border-b border-slate-200 px-4 sm:px-8 py-4 sm:py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 z-10 shadow-xs">
+            <header class="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 sm:py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 z-10 shadow-xs shrink-0">
                 <div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Catalogo Ricambi ("ricambi")</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Gestisci la disponibilità e la pubblicazione sul sito in tempo reale</p>
+                    <h2 class="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Catalogo Ricambi</h2>
+                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Gestisci i pezzi e aggiorna il sito in tempo reale</p>
                 </div>
-                <div class="flex items-center gap-3 w-full sm:w-auto">
-                    <button onclick="openModal('addModal')" class="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-md shadow-amber-500/15 active:scale-95 text-sm">
+                <div class="w-full sm:w-auto">
+                    <button onclick="openModal('addModal')" class="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-md shadow-amber-500/15 active:scale-95 text-sm sm:text-base">
                         <i class="ph ph-plus-circle text-lg"></i>
                         Aggiungi Nuovo Pezzo
                     </button>
                 </div>
             </header>
 
-            <div class="p-4 sm:p-8 bg-white border-b border-slate-200 shadow-2xs">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="p-4 sm:p-6 bg-white border-b border-slate-200 shadow-2xs shrink-0">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div class="sm:col-span-2 relative">
                         <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="text" id="searchInput" placeholder="Cerca SKU, Descrizione, Modello Auto..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
+                        <input type="text" id="searchInput" placeholder="Cerca Nome, Codice OEM..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
                     </div>
                     
+                    <!-- Nuovo Filtro Modello Dinamico -->
                     <div>
-                        <select id="categoryFilter" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
+                        <select id="modelFilter" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium truncate">
+                            <option value="">Tutti i Modelli</option>
+                            <!-- Popolato da JS -->
+                        </select>
+                    </div>
+
+                    <div>
+                        <select id="categoryFilter" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
                             <option value="">Tutte le Categorie</option>
                             <option value="motore">Motore</option>
                             <option value="carrozzeria">Carrozzeria</option>
                             <option value="elettrico">Elettronica</option>
-                            <option value="ruote">Sospensioni</option>
+                            <option value="meccanica">Meccanica</option>
                             <option value="interni">Abitacolo</option>
                             <option value="moto">Moto</option>
                         </select>
                     </div>
-
-                    <div>
-                        <select id="statusFilter" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
-                            <option value="">Tutti gli stati</option>
-                            <option value="online">Visibili sul Sito</option>
-                            <option value="offline">Solo in Magazzino</option>
-                            <option value="sold">Esauriti / Venduti</option>
-                        </select>
-                    </div>
                 </div>
                 
-                <div class="flex flex-wrap items-center gap-3 sm:gap-6 mt-4 sm:mt-5 pt-4 border-t border-slate-100 text-xs font-semibold">
-                    <span class="flex items-center gap-2 bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg"><i class="ph ph-package text-base text-slate-500"></i> Totale: <strong id="totalItems" class="text-slate-900 text-sm">0</strong></span>
-                    <span class="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg"><i class="ph ph-globe text-base text-blue-500"></i> Online: <strong id="onlineItems" class="text-blue-900 text-sm">0</strong></span>
-                    <span class="flex items-center gap-2 bg-red-50 text-red-700 px-3 py-1.5 rounded-lg"><i class="ph ph-warning-circle text-base text-red-500"></i> Esauriti: <strong id="lowStockItems" class="text-red-900 text-sm">0</strong></span>
+                <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-4 pt-4 border-t border-slate-100 text-[11px] sm:text-xs font-semibold">
+                    <span class="flex items-center gap-1.5 bg-slate-100 text-slate-700 px-2.5 py-1.5 rounded-lg"><i class="ph ph-package text-sm text-slate-500"></i> Totale: <strong id="totalItems" class="text-slate-900 text-sm">0</strong></span>
+                    <span class="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2.5 py-1.5 rounded-lg"><i class="ph ph-globe text-sm text-blue-500"></i> Online: <strong id="onlineItems" class="text-blue-900 text-sm">0</strong></span>
+                    <span class="flex items-center gap-1.5 bg-red-50 text-red-700 px-2.5 py-1.5 rounded-lg"><i class="ph ph-warning-circle text-sm text-red-500"></i> Esauriti: <strong id="lowStockItems" class="text-red-900 text-sm">0</strong></span>
                 </div>
             </div>
 
-            <div class="flex-1 overflow-auto p-4 sm:p-8">
+            <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[750px]">
-                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-xs font-bold">
+                    <div class="overflow-x-auto hide-scroll sm:custom-scrollbar">
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px] sm:text-xs font-bold">
                                 <tr>
-                                    <th class="py-3.5 px-4 sm:px-5">Codice (OEM)</th>
-                                    <th class="py-3.5 px-4 sm:px-5">Foto</th>
-                                    <th class="py-3.5 px-4 sm:px-5">Nome / Compatibilità</th>
-                                    <th class="py-3.5 px-4 sm:px-5">Categoria</th>
-                                    <th class="py-3.5 px-4 sm:px-5">Condizione</th>
-                                    <th class="py-3.5 px-4 sm:px-5">Q.tà</th>
-                                    <th class="py-3.5 px-4 sm:px-5 text-right">Prezzo</th>
-                                    <th class="py-3.5 px-4 sm:px-5 text-center">Stato Sito</th>
-                                    <th class="py-3.5 px-4 sm:px-5 text-center">Azioni</th>
+                                    <th class="py-3 px-4">Codice OEM</th>
+                                    <th class="py-3 px-4">Foto</th>
+                                    <th class="py-3 px-4">Ricambio</th>
+                                    <th class="py-3 px-4">Modello Veicolo</th>
+                                    <th class="py-3 px-4">Categoria</th>
+                                    <th class="py-3 px-4 text-center">Q.tà</th>
+                                    <th class="py-3 px-4 text-right">Prezzo</th>
+                                    <th class="py-3 px-4 text-center">Sito</th>
+                                    <th class="py-3 px-4 text-center">Azioni</th>
                                 </tr>
                             </thead>
-                            <tbody id="inventoryTableBody" class="divide-y divide-slate-100 text-sm">
+                            <tbody id="inventoryTableBody" class="divide-y divide-slate-100 text-[13px] sm:text-sm">
                             </tbody>
                         </table>
                     </div>
                     
-                    <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-slate-400">
-                        <div class="w-16 h-16 bg-slate-100 text-slate-300 rounded-2xl flex items-center justify-center mb-3">
+                    <div id="emptyState" class="hidden flex-col items-center justify-center py-12 text-slate-400 text-center px-4">
+                        <div class="w-14 h-14 bg-slate-100 text-slate-300 rounded-2xl flex items-center justify-center mb-3">
                             <i class="ph ph-package text-3xl"></i>
                         </div>
-                        <p class="text-base font-semibold text-slate-700">Nessun ricambio trovato</p>
-                        <p class="text-xs text-slate-400 mt-1">Modifica i filtri di ricerca o inserisci un nuovo componente nel magazzino.</p>
+                        <p class="text-sm font-semibold text-slate-700">Nessun ricambio trovato</p>
+                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Aggiungi un nuovo pezzo per iniziare a vendere sul sito.</p>
                     </div>
                 </div>
             </div>
@@ -207,58 +221,57 @@
 
         <!-- HISTORY VIEW (Admin Only) -->
         <div id="historyView" class="hidden flex-col h-full w-full bg-slate-100 overflow-hidden">
-            <header class="bg-white border-b border-slate-200 px-4 sm:px-8 py-4 sm:py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-xs">
+            <header class="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 sm:py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-xs shrink-0">
                 <div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Storico Vendite e Contabilità</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Controllo completo degli incassi, dei pezzi venduti e degli operatori</p>
+                    <h2 class="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Storico Vendite</h2>
+                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Contabilità riservata amministratore</p>
                 </div>
-                <div>
-                    <button onclick="clearSalesHistory()" class="w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 border border-red-200 transition-all">
+                <div class="w-full sm:w-auto">
+                    <button onclick="clearSalesHistory()" class="w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 border border-red-200 transition-all">
                         <i class="ph ph-trash text-base"></i> Svuota Storico e Incassi
                     </button>
                 </div>
             </header>
             
-            <div class="p-4 sm:p-8 flex-1 overflow-auto space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-xs border border-slate-200/80 flex items-center gap-5">
-                        <div class="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-2xl shadow-inner shrink-0">
-                            <i class="ph-fill ph-currency-eur"></i>
+            <div class="p-4 sm:p-6 flex-1 overflow-y-auto custom-scrollbar space-y-4 sm:space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-200/80 flex items-center gap-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-xl sm:text-2xl shadow-inner shrink-0">
+                            <i class="ph-fill ph-wallet"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Incasso Totale (Lordo)</p>
-                            <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1" id="totalRevenue">€ 0.00</h3>
+                            <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">Incasso Totale</p>
+                            <h3 class="text-xl sm:text-3xl font-extrabold text-slate-900 mt-0.5 sm:mt-1" id="totalRevenue">0.00</h3>
                         </div>
                     </div>
-                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-xs border border-slate-200/80 flex items-center gap-5">
-                        <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 text-2xl shadow-inner shrink-0">
+                    <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-200/80 flex items-center gap-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 text-xl sm:text-2xl shadow-inner shrink-0">
                             <i class="ph-fill ph-shopping-bag"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pezzi Venduti</p>
-                            <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1" id="totalSoldItems">0</h3>
+                            <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">Pezzi Venduti</p>
+                            <h3 class="text-xl sm:text-3xl font-extrabold text-slate-900 mt-0.5 sm:mt-1" id="totalSoldItems">0</h3>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-                    <div class="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2 text-xs sm:text-sm uppercase tracking-wider">
-                            <i class="ph ph-clock-counter-clockwise text-amber-500 text-lg"></i> Registro Operazioni & Vendite
+                    <div class="p-3.5 sm:p-5 border-b border-slate-100 bg-slate-50/50">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2 text-[11px] sm:text-sm uppercase tracking-wider">
+                            <i class="ph ph-clock-counter-clockwise text-amber-500 text-lg"></i> Registro Operazioni
                         </h3>
                     </div>
-                    <div class="overflow-auto max-h-[500px]">
+                    <div class="overflow-x-auto hide-scroll sm:custom-scrollbar">
                         <table class="w-full text-left border-collapse min-w-[600px]">
-                            <thead class="bg-white border-b border-slate-200 sticky top-0 text-slate-500 uppercase tracking-wider text-xs font-bold">
+                            <thead class="bg-white border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px] sm:text-xs font-bold">
                                 <tr>
-                                    <th class="py-3.5 px-4 sm:px-5">Data e Ora</th>
-                                    <th class="py-3.5 px-4 sm:px-5">Codice OEM</th>
-                                    <th class="py-3.5 px-4 sm:px-5">Descrizione Ricambio</th>
-                                    <th class="py-3.5 px-4 sm:px-5">Venduto Da</th>
-                                    <th class="py-3.5 px-4 sm:px-5 text-right">Incasso</th>
+                                    <th class="py-3 px-4">Data e Ora</th>
+                                    <th class="py-3 px-4">Modello / Ricambio</th>
+                                    <th class="py-3 px-4">Venduto Da</th>
+                                    <th class="py-3 px-4 text-right">Incasso</th>
                                 </tr>
                             </thead>
-                            <tbody id="salesTableBody" class="divide-y divide-slate-100 bg-white text-sm">
+                            <tbody id="salesTableBody" class="divide-y divide-slate-100 bg-white text-[13px] sm:text-sm">
                             </tbody>
                         </table>
                     </div>
@@ -269,106 +282,101 @@
     </main>
 
     <!-- Modal Add/Edit Item -->
-    <div id="addModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden z-50 flex items-center justify-center opacity-0 transition-opacity duration-300 p-2 sm:p-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto transform scale-95 transition-transform duration-300 border border-slate-100" id="modalContent">
+    <div id="addModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden z-[100] flex items-center justify-center opacity-0 transition-opacity duration-300 p-3 sm:p-4">
+        <!-- Modificato w-full e padding per adattarsi meglio al mobile -->
+        <div class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col transform scale-95 transition-transform duration-300 border border-slate-100" id="modalContent">
             
-            <div class="sticky top-0 bg-white/95 backdrop-blur-md border-b border-slate-100 px-6 sm:px-8 py-4 sm:py-5 flex justify-between items-center z-10">
+            <div class="bg-white border-b border-slate-100 px-5 sm:px-8 py-4 flex justify-between items-center rounded-t-2xl sm:rounded-t-3xl shrink-0">
                 <div>
-                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight" id="modalTitle">Aggiungi Nuovo Ricambio</h3>
-                    <p class="text-xs text-slate-500">Compila i dettagli tecnici sincronizzati con il sito pubblico</p>
+                    <h3 class="text-base sm:text-xl font-bold text-slate-900 tracking-tight" id="modalTitle">Aggiungi Nuovo Ricambio</h3>
+                    <p class="text-[10px] sm:text-xs text-slate-500 mt-0.5">Sincronizzazione in tempo reale con il sito</p>
                 </div>
-                <button onclick="closeModal('addModal')" class="w-10 h-10 bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-500 rounded-xl flex items-center justify-center transition-colors">
-                    <i class="ph ph-x text-xl"></i>
+                <button type="button" onclick="closeModal('addModal')" class="w-8 h-8 sm:w-10 sm:h-10 bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-500 rounded-xl flex items-center justify-center transition-colors">
+                    <i class="ph ph-x text-lg sm:text-xl"></i>
                 </button>
             </div>
 
-            <form id="itemForm" class="p-5 sm:p-8">
+            <form id="itemForm" class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8">
                 <input type="hidden" id="itemId">
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-                    <div class="md:col-span-2 space-y-4 sm:space-y-5">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+                    <div class="lg:col-span-2 space-y-4 sm:space-y-5">
+                        
+                        <!-- IL NUOVO FILTRO UNICO DEL MODELLO -->
+                        <div class="bg-amber-50/50 p-4 rounded-2xl border border-amber-100">
+                            <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-700 mb-2">Modello Veicolo (Filtro Unico Sito)*</label>
+                            <p class="text-[10px] sm:text-xs text-slate-500 mb-2 leading-tight">Scrivi per intero Marca, Modello e Anni per raggruppare i pezzi correttamente sul sito web.</p>
+                            <input type="text" id="itemModel" list="modelSuggestions" required class="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-semibold text-slate-900 shadow-sm" placeholder="Es: Fiat Panda (2012-2020)">
+                            <!-- Datalist per suggerimenti automatici -->
+                            <datalist id="modelSuggestions"></datalist>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Codice OEM*</label>
-                                <input type="text" id="itemCode" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none uppercase font-mono text-sm font-semibold" placeholder="Es. OEM-12345">
+                                <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Nome Ricambio*</label>
+                                <input type="text" id="itemName" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium" placeholder="Es. Paraurti anteriore">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Categoria*</label>
+                                <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Codice OEM (Opzionale)</label>
+                                <input type="text" id="itemCode" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none uppercase font-mono text-sm font-semibold" placeholder="Es. OEM-123">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Categoria*</label>
                                 <select id="itemCategory" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
                                     <option value="">Seleziona...</option>
                                     <option value="motore">Motore</option>
                                     <option value="carrozzeria">Carrozzeria</option>
                                     <option value="elettrico">Elettronica</option>
-                                    <option value="ruote">Sospensioni</option>
+                                    <option value="meccanica">Meccanica</option>
                                     <option value="interni">Abitacolo</option>
                                     <option value="moto">Moto</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Nome Ricambio*</label>
-                                <input type="text" id="itemName" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium" placeholder="Es. Alternatore">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Marca*</label>
-                                <input type="text" id="itemBrand" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium" placeholder="Es. Fiat">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Modello*</label>
-                                <input type="text" id="itemModel" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium" placeholder="Es. Panda">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Anni*</label>
-                                <input type="text" id="itemYears" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium" placeholder="Es. 2012-2020">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Prezzo (€)*</label>
+                                <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Prezzo (€)*</label>
                                 <input type="number" step="0.01" id="itemPrice" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium" placeholder="0.00">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Quantità*</label>
+                                <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Q.tà*</label>
                                 <input type="number" id="itemQty" value="1" min="0" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Descrizione Dettagliata</label>
-                            <textarea id="itemDesc" rows="2" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none resize-none text-sm font-medium" placeholder="Dettagli visibili sul sito..."></textarea>
+                            <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Descrizione Pubblica (Opzionale)</label>
+                            <textarea id="itemDesc" rows="2" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none resize-none text-sm font-medium" placeholder="Dettagli visibili ai clienti sul sito..."></textarea>
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 p-5 sm:p-6 rounded-2xl border border-slate-200 space-y-4 sm:space-y-5">
-                        <h4 class="font-bold text-slate-800 flex items-center gap-2 text-xs sm:text-sm uppercase tracking-wider border-b border-slate-200 pb-3">
-                            <i class="ph ph-warehouse text-amber-500 text-lg"></i> Visibilità & Foto
+                    <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-4 sm:space-y-5 h-fit">
+                        <h4 class="font-bold text-slate-800 flex items-center gap-2 text-[11px] sm:text-xs uppercase tracking-wider border-b border-slate-200 pb-2">
+                            <i class="ph ph-warehouse text-amber-500 text-lg"></i> Info e Foto
                         </h4>
                         
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Condizione</label>
+                            <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Condizione</label>
                             <select id="itemCondition" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
                                 <option value="Ottimo">Ottimo</option>
-                                <option value="Buono" selected>Buono</option>
+                                <option value="Buono" selected>Buono (Usato)</option>
                                 <option value="Discreto">Discreto</option>
                             </select>
                         </div>
 
-                        <div class="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs space-y-3">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Carica Foto dal Dispositivo</label>
-                                <input type="file" id="imageFileInput" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer">
-                                <input type="hidden" id="itemImage">
-                            </div>
+                        <div class="p-3.5 bg-white border border-slate-200 rounded-xl shadow-2xs">
+                            <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Foto dal Telefono/PC</label>
+                            <input type="file" id="imageFileInput" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer overflow-hidden">
+                            <p class="text-[10px] text-slate-400 mt-2">Viene compressa automaticamente per il sito.</p>
+                            <input type="hidden" id="itemImage">
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-6 sm:mt-8 pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row justify-end gap-3 sticky bottom-0 bg-white pb-2">
-                    <button type="button" onclick="closeModal('addModal')" class="w-full sm:w-auto px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold text-sm transition-colors text-center">Annulla</button>
-                    <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold text-sm transition-all shadow-md shadow-slate-900/10 flex items-center justify-center gap-2">
+                <div class="mt-6 sm:mt-8 pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-end gap-3 shrink-0">
+                    <button type="button" onclick="closeModal('addModal')" class="w-full sm:w-auto px-5 py-3 sm:py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold text-sm transition-colors text-center order-2 sm:order-1 border border-slate-200 sm:border-transparent">Annulla</button>
+                    <button type="submit" class="w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold text-sm transition-all shadow-md shadow-slate-900/10 flex items-center justify-center gap-2 order-1 sm:order-2">
                         <i class="ph ph-floppy-disk text-lg"></i> Salva nel Database
                     </button>
                 </div>
@@ -377,14 +385,15 @@
     </div>
 
     <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 z-50 flex items-center gap-3 border border-slate-800">
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 z-[200] flex items-center gap-3 border border-slate-800 w-11/12 sm:w-auto max-w-sm">
         <i class="ph-fill ph-check-circle text-2xl text-emerald-400" id="toastIcon"></i>
-        <span id="toastMsg" class="font-semibold text-sm">Operazione completata</span>
+        <span id="toastMsg" class="font-semibold text-sm leading-tight">Operazione completata</span>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, addDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDMWLVIVhBXJqAKFlDhZPcac8gaJFUKq6Q",
@@ -395,10 +404,11 @@
             appId: "1:644217371779:web:26d6ceb0b51df966d36fb6"
         };
         
-        let db;
+        let app, db, auth;
         try {
-            const app = initializeApp(firebaseConfig);
+            app = initializeApp(firebaseConfig);
             db = getFirestore(app);
+            auth = getAuth(app);
         } catch(e) {
             console.error("Firebase init err:", e);
         }
@@ -413,17 +423,17 @@
         const salesTableBody = document.getElementById('salesTableBody');
         const searchInput = document.getElementById('searchInput');
         const categoryFilter = document.getElementById('categoryFilter');
-        const statusFilter = document.getElementById('statusFilter');
+        const modelFilter = document.getElementById('modelFilter'); // Nuovo Filtro Modello
         const form = document.getElementById('itemForm');
 
         window.toggleMobileMenu = function() {
             const sidebar = document.getElementById('sidebarNav');
-            const icon = document.getElementById('mobileMenuIcon');
+            const overlay = document.getElementById('mobileMenuOverlay');
             sidebar.classList.toggle('-translate-x-full');
             if(sidebar.classList.contains('-translate-x-full')) {
-                icon.className = "ph ph-list text-2xl";
+                overlay.classList.add('hidden');
             } else {
-                icon.className = "ph ph-x text-2xl";
+                overlay.classList.remove('hidden');
             }
         };
 
@@ -480,12 +490,19 @@
             } else {
                 document.getElementById('nav-history').classList.add('hidden');
                 document.getElementById('nav-history').classList.remove('flex');
-                if(document.getElementById('historyView').classList.contains('flex-col')) {
+                if(!document.getElementById('historyView').classList.contains('hidden')) {
                     switchView('inventory');
                 }
             }
 
-            initFirebaseData();
+            // Autenticazione Anonima su Firebase per scrivere
+            try {
+                await signInAnonymously(auth);
+                initFirebaseData();
+            } catch(error) {
+                console.error("Auth error", error);
+                showToast("Errore di connessione. Verifica le regole Firebase.", "red");
+            }
         }
 
         window.logout = function() {
@@ -502,17 +519,46 @@
         function initFirebaseData() {
             if (!db) return;
 
+            // Ascolta collezione 'ricambi' per il sito principale
             onSnapshot(collection(db, 'ricambi'), (snapshot) => {
                 inventory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Aggiorna i filtri dinamici dei modelli auto
+                updateModelDropdowns();
+
                 renderTable();
                 updateStats();
             }, (error) => console.error("Inventory error", error));
 
-            onSnapshot(collection(db, 'sales_history'), (snapshot) => {
-                salesHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                salesHistory.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                renderSalesTable();
-            }, (error) => console.error("Sales error", error));
+            if(currentUserRole === 'admin') {
+                onSnapshot(collection(db, 'sales_history'), (snapshot) => {
+                    salesHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    salesHistory.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                    renderSalesTable();
+                }, (error) => console.error("Sales error", error));
+            }
+        }
+
+        // Funzione per estrarre tutti i modelli univoci dal DB e popolare i menu a tendina
+        function updateModelDropdowns() {
+            // Estrae il campo 'model' (oppure combina brand+model se ci sono vecchi dati)
+            const allModels = inventory.map(i => {
+                if(i.model) return i.model;
+                if(i.brand && i.years) return `${i.brand} ${i.years}`;
+                return null;
+            }).filter(Boolean);
+
+            const uniqueModels = [...new Set(allModels)].sort();
+
+            // Aggiorna tendina Filtro tabella
+            const currentFilterVal = modelFilter.value;
+            modelFilter.innerHTML = '<option value="">Tutti i Modelli</option>' + 
+                uniqueModels.map(m => `<option value="${m}">${m}</option>`).join('');
+            modelFilter.value = currentFilterVal; // Mantiene la selezione se aggiornata
+
+            // Aggiorna il Datalist (suggerimenti di scrittura) nel form di inserimento
+            const dataList = document.getElementById('modelSuggestions');
+            dataList.innerHTML = uniqueModels.map(m => `<option value="${m}">`).join('');
         }
 
         window.switchView = function(viewName) {
@@ -521,11 +567,8 @@
             document.getElementById('historyView').classList.add('hidden');
             document.getElementById('historyView').classList.remove('flex-col');
             
-            // Auto close mobile menu on selection
-            if(window.innerWidth < 768) {
-                document.getElementById('sidebarNav').classList.add('-translate-x-full');
-                document.getElementById('mobileMenuIcon').className = "ph ph-list text-2xl";
-            }
+            // Auto close mobile menu
+            if(window.innerWidth < 768) toggleMobileMenu();
 
             document.querySelectorAll('.nav-item').forEach(el => {
                 if(!el.getAttribute('target')) {
@@ -552,28 +595,21 @@
         window.renderTable = function() {
             const searchTerm = searchInput.value.toLowerCase();
             const category = categoryFilter.value;
-            const status = statusFilter.value;
+            const modelSearch = modelFilter.value;
 
             const filteredInventory = inventory.filter(item => {
                 const code = item.code || '';
                 const name = item.name || '';
-                const brand = item.brand || '';
-                const model = item.model || '';
+                // Gestione retrocompatibilità per vecchi dati senza 'model' unificato
+                const vehicleModel = item.model || `${item.brand || ''} ${item.years || ''}`.trim();
                 
-                const matchesSearch = code.toLowerCase().includes(searchTerm) || 
-                                      name.toLowerCase().includes(searchTerm) || 
-                                      brand.toLowerCase().includes(searchTerm) ||
-                                      model.toLowerCase().includes(searchTerm);
-                
-                const matchesCategory = category === '' || item.cat === category;
-                const qty = item.qty !== undefined ? item.qty : 1;
-                
-                let matchesStatus = true;
-                if (status === 'online') matchesStatus = qty > 0;
-                if (status === 'offline') matchesStatus = qty > 0;
-                if (status === 'sold') matchesStatus = qty === 0;
+                let itemCategoryForFilter = item.cat === 'ruote' ? 'meccanica' : item.cat;
 
-                return matchesSearch && matchesCategory && matchesStatus;
+                const matchesSearch = code.toLowerCase().includes(searchTerm) || name.toLowerCase().includes(searchTerm);
+                const matchesCategory = category === '' || itemCategoryForFilter === category;
+                const matchesModel = modelSearch === '' || vehicleModel === modelSearch;
+                
+                return matchesSearch && matchesCategory && matchesModel;
             });
 
             tableBody.innerHTML = '';
@@ -587,39 +623,40 @@
             }
 
             filteredInventory.forEach(item => {
-                const qty = item.qty !== undefined ? item.qty : 1;
-                const isOutOfStock = qty === 0;
-                const rowClass = isOutOfStock ? 'bg-red-50/50 opacity-75' : 'hover:bg-slate-50/80';
+                const qty = parseInt(item.qty) || 0;
+                const isOutOfStock = qty <= 0;
+                const rowClass = isOutOfStock ? 'bg-red-50/40 opacity-80' : 'hover:bg-slate-50/80';
                 
                 let onlineBadge = isOutOfStock ? 
-                    `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 whitespace-nowrap"><i class="ph-fill ph-x-circle"></i> Esaurito</span>` :
-                    `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 whitespace-nowrap"><i class="ph-fill ph-globe"></i> Sul Sito (${qty})</span>`;
+                    `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-red-100 text-red-700 whitespace-nowrap"><i class="ph-fill ph-x-circle"></i> Esaurito</span>` :
+                    `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-100 text-blue-700 whitespace-nowrap"><i class="ph-fill ph-globe"></i> Sul Sito</span>`;
 
                 const imgPlaceholder = `https://placehold.co/60x60/e2e8f0/475569?text=RIC`;
                 const imgSrc = item.image || imgPlaceholder;
                 const price = parseFloat(item.price) || 0;
+                const vehicleModelDisplay = item.model || `${item.brand || ''} ${item.years || ''}`.trim() || '-';
+                
+                let displayCat = item.cat || '-';
+                if(displayCat === 'ruote') displayCat = 'meccanica';
 
                 const deleteBtn = currentUserRole === 'admin' ? 
-                    `<button onclick="deleteItem('${item.id}')" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="Elimina definitivamente"><i class="ph ph-trash text-lg"></i></button>` : '';
+                    `<button onclick="deleteItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Elimina definitivamente"><i class="ph ph-trash text-lg"></i></button>` : '';
 
                 const tr = document.createElement('tr');
                 tr.className = `border-b border-slate-100 transition-colors ${rowClass}`;
                 tr.innerHTML = `
-                    <td class="py-3.5 px-4 sm:px-5"><span class="font-mono text-xs font-bold bg-slate-100 px-2 py-1 rounded-lg text-slate-700 border border-slate-200/60 whitespace-nowrap">${item.code || '-'}</span></td>
-                    <td class="py-3.5 px-4 sm:px-5"><img src="${imgSrc}" class="w-10 h-10 rounded-xl object-cover border border-slate-200 bg-white shrink-0" onerror="this.src='${imgPlaceholder}'"></td>
-                    <td class="py-3.5 px-4 sm:px-5">
-                        <div class="font-semibold text-slate-900">${item.name || '-'}</div>
-                        <div class="text-xs text-slate-500 font-medium">${item.brand || ''} ${item.model || ''} (${item.years || ''})</div>
-                    </td>
-                    <td class="py-3.5 px-4 sm:px-5 text-slate-600 font-medium whitespace-nowrap">${item.cat || '-'}</td>
-                    <td class="py-3.5 px-4 sm:px-5"><span class="text-xs px-2 py-1 rounded-full border font-semibold bg-blue-50 text-blue-700 border-blue-200 whitespace-nowrap">${item.cond || 'Buono'}</span></td>
-                    <td class="py-3.5 px-4 sm:px-5"><span class="font-bold ${isOutOfStock ? 'text-red-600' : 'text-slate-900'}">${qty}</span></td>
-                    <td class="py-3.5 px-4 sm:px-5 text-right font-bold text-slate-900 whitespace-nowrap">€${price.toFixed(2)}</td>
-                    <td class="py-3.5 px-4 sm:px-5 text-center">${onlineBadge}</td>
-                    <td class="py-3.5 px-4 sm:px-5">
-                        <div class="flex items-center justify-center gap-1">
-                            <button onclick="sellItem('${item.id}')" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors" title="Vendi 1 pezzo (-1 Q.tà)" ${isOutOfStock ? 'disabled class="opacity-40 cursor-not-allowed"' : ''}><i class="ph ph-currency-eur text-lg"></i></button>
-                            <button onclick="editItem('${item.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors" title="Modifica Articolo"><i class="ph ph-pencil-simple text-lg"></i></button>
+                    <td class="py-2.5 px-4"><span class="font-mono text-[11px] font-bold bg-slate-100 px-1.5 py-1 rounded text-slate-700 border border-slate-200/60 whitespace-nowrap">${item.code || '-'}</span></td>
+                    <td class="py-2.5 px-4"><img src="${imgSrc}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover border border-slate-200 bg-white shrink-0" onerror="this.src='${imgPlaceholder}'"></td>
+                    <td class="py-2.5 px-4 font-semibold text-slate-900">${item.name || '-'}</td>
+                    <td class="py-2.5 px-4 font-bold text-amber-700 text-[11px] sm:text-xs bg-amber-50/50 rounded whitespace-nowrap">${vehicleModelDisplay}</td>
+                    <td class="py-2.5 px-4 text-slate-600 font-medium whitespace-nowrap capitalize">${displayCat}</td>
+                    <td class="py-2.5 px-4 text-center"><span class="font-bold text-sm ${isOutOfStock ? 'text-red-600' : 'text-slate-900'}">${qty}</span></td>
+                    <td class="py-2.5 px-4 text-right font-bold text-slate-900 whitespace-nowrap">€${price.toFixed(2)}</td>
+                    <td class="py-2.5 px-4 text-center">${onlineBadge}</td>
+                    <td class="py-2.5 px-4">
+                        <div class="flex items-center justify-center gap-0.5">
+                            <button onclick="sellItem('${item.id}')" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Vendi 1 pezzo (-1 Q.tà)" ${isOutOfStock ? 'disabled class="opacity-40 cursor-not-allowed"' : ''}><i class="ph ph-currency-eur text-lg"></i></button>
+                            <button onclick="editItem('${item.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Modifica Articolo"><i class="ph ph-pencil-simple text-lg"></i></button>
                             ${deleteBtn}
                         </div>
                     </td>
@@ -633,7 +670,7 @@
             let totalRev = 0;
 
             if (salesHistory.length === 0) {
-                 salesTableBody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">Nessuna vendita registrata nel registro.</td></tr>`;
+                 salesTableBody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 text-xs">Nessuna vendita registrata.</td></tr>`;
             }
 
             salesHistory.forEach(sale => {
@@ -644,26 +681,29 @@
                 }
                 const price = parseFloat(sale.price) || 0;
                 totalRev += price;
+                const modelDisplay = sale.itemModel || '-';
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80";
                 tr.innerHTML = `
-                    <td class="py-3.5 px-4 sm:px-5 text-slate-500 font-medium whitespace-nowrap">${dateStr}</td>
-                    <td class="py-3.5 px-4 sm:px-5 font-mono font-bold text-slate-700 whitespace-nowrap">${sale.itemCode || '-'}</td>
-                    <td class="py-3.5 px-4 sm:px-5 font-semibold text-slate-900">${sale.itemName}</td>
-                    <td class="py-3.5 px-4 sm:px-5 text-slate-700 font-medium whitespace-nowrap"><span class="inline-flex items-center gap-1"><i class="ph-fill ph-user-circle text-amber-500"></i> ${sale.soldBy || 'Sistema'}</span></td>
-                    <td class="py-3.5 px-4 sm:px-5 font-bold text-emerald-600 text-right whitespace-nowrap">+ €${price.toFixed(2)}</td>
+                    <td class="py-3 px-4 text-slate-500 font-medium whitespace-nowrap text-xs">${dateStr}</td>
+                    <td class="py-3 px-4 text-xs">
+                        <div class="font-bold text-slate-900">${sale.itemName}</div>
+                        <div class="text-[10px] text-amber-600 font-semibold">${modelDisplay}</div>
+                    </td>
+                    <td class="py-3 px-4 text-slate-700 font-medium whitespace-nowrap text-xs"><span class="inline-flex items-center gap-1"><i class="ph-fill ph-user-circle text-amber-500"></i> ${sale.soldBy || 'Sistema'}</span></td>
+                    <td class="py-3 px-4 font-bold text-emerald-600 text-right whitespace-nowrap text-sm">+ ${price.toFixed(2)}</td>
                 `;
                 salesTableBody.appendChild(tr);
             });
 
-            document.getElementById('totalRevenue').textContent = `€ ${totalRev.toFixed(2)}`;
+            document.getElementById('totalRevenue').textContent = `${totalRev.toFixed(2)}`;
             document.getElementById('totalSoldItems').textContent = salesHistory.length;
         }
 
         window.clearSalesHistory = async function() {
             if(currentUserRole !== 'admin') return;
-            if(confirm("Vuoi davvero azzerare lo storico delle vendite e gli incassi totali?")) {
+            if(confirm("Vuoi davvero azzerare lo storico delle vendite e gli incassi totali? L'operazione è irreversibile.")) {
                 try {
                     const querySnapshot = await getDocs(collection(db, "sales_history"));
                     for (let d of querySnapshot.docs) {
@@ -677,6 +717,7 @@
             }
         };
 
+        // Compressione Immagine Automatica
         document.getElementById("imageFileInput").addEventListener("change", function(e) {
             const file = e.target.files[0];
             if(!file) { compressedImageBase64 = ""; return; }
@@ -685,7 +726,7 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement("canvas");
-                    const MAX_WIDTH = 500; const MAX_HEIGHT = 500;
+                    const MAX_WIDTH = 600; const MAX_HEIGHT = 600;
                     let width = img.width; let height = img.height;
                     if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
                     else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
@@ -714,15 +755,15 @@
             const itemData = {
                 code: document.getElementById('itemCode').value.toUpperCase(),
                 name: document.getElementById('itemName').value,
-                brand: document.getElementById('itemBrand').value,
-                model: document.getElementById('itemModel').value,
-                years: document.getElementById('itemYears').value,
+                model: document.getElementById('itemModel').value, // <-- IL NUOVO FILTRO UNICO!
                 price: parseFloat(document.getElementById('itemPrice').value),
                 qty: parseInt(document.getElementById('itemQty').value),
                 cat: document.getElementById('itemCategory').value,
                 cond: document.getElementById('itemCondition').value,
                 desc: document.getElementById('itemDesc').value,
                 image: finalImage
+                // Non salviamo più brand e years separatamente per evitare conflitti, 
+                // tutto risiede nel campo "model" esattamente come chiede il nuovo sito.
             };
 
             try {
@@ -736,7 +777,7 @@
                 closeModal('addModal');
             } catch(err) {
                 console.error(err);
-                showToast('Errore di scrittura su Firebase.', 'red');
+                showToast('Errore di scrittura su Firebase. Controlla le regole.', 'red');
             }
         };
 
@@ -747,11 +788,13 @@
             document.getElementById('modalTitle').textContent = 'Modifica Ricambio';
             document.getElementById('itemId').value = item.id;
             document.getElementById('itemCode').value = item.code || '';
-            document.getElementById('itemCategory').value = item.cat || '';
+            document.getElementById('itemCategory').value = item.cat === 'ruote' ? 'meccanica' : (item.cat || '');
             document.getElementById('itemName').value = item.name || '';
-            document.getElementById('itemBrand').value = item.brand || '';
-            document.getElementById('itemModel').value = item.model || '';
-            document.getElementById('itemYears').value = item.years || '';
+            
+            // Retrocompatibilità se l'articolo è vecchio e aveva brand/years divisi
+            const modelVal = item.model || `${item.brand || ''} ${item.years || ''}`.trim();
+            document.getElementById('itemModel').value = modelVal;
+            
             document.getElementById('itemCondition').value = item.cond || 'Buono';
             document.getElementById('itemPrice').value = item.price || 0;
             document.getElementById('itemQty').value = item.qty !== undefined ? item.qty : 1;
@@ -763,33 +806,42 @@
 
         window.deleteItem = async function(id) {
             if(!db || currentUserRole !== 'admin') return;
-            try {
-                await deleteDoc(doc(db, 'ricambi', id));
-                showToast('Ricambio eliminato definitivamente', 'red');
-            } catch(e) { console.error(e); }
+            if(confirm("Sei sicuro di voler eliminare definitivamente questo articolo?")) {
+                try {
+                    await deleteDoc(doc(db, 'ricambi', id));
+                    showToast('Ricambio eliminato definitivamente', 'red');
+                } catch(e) { console.error(e); }
+            }
         };
 
         window.sellItem = async function(id) {
             if(!db) return;
             const item = inventory.find(i => i.id === id);
-            const currentQty = item.qty !== undefined ? item.qty : 1;
+            const currentQty = parseInt(item.qty) || 0;
             
             if (item && currentQty > 0) {
                 try {
                     const newQty = currentQty - 1;
                     
+                    // 1. Aggiorna la quantità nel database (se va a 0, scompare dal sito in automatico)
                     await setDoc(doc(db, 'ricambi', id), { qty: newQty }, { merge: true });
                     
+                    // 2. Registra la vendita nello storico contabile
                     await addDoc(collection(db, 'sales_history'), {
                         itemId: item.id,
                         itemCode: item.code || '-',
                         itemName: item.name,
+                        itemModel: item.model || `${item.brand || ''} ${item.years || ''}`.trim(),
                         price: parseFloat(item.price),
                         soldBy: currentUserName,
                         timestamp: serverTimestamp()
                     });
 
-                    showToast(`Vendita registrata da ${currentUserName}! Q.tà rimanente: ${newQty}`);
+                    if(newQty === 0) {
+                        showToast(`Venduto da ${currentUserName}! Pezzo Esaurito (Rimosso dal sito).`);
+                    } else {
+                        showToast(`Venduto 1 pezzo! Q.tà rimanente: ${newQty}`);
+                    }
                 } catch(e) {
                     console.error(e);
                     showToast('Errore durante la registrazione della vendita', 'red');
@@ -799,8 +851,8 @@
 
         function updateStats() {
             document.getElementById('totalItems').textContent = inventory.length;
-            document.getElementById('onlineItems').textContent = inventory.filter(i => (i.qty !== undefined ? i.qty : 1) > 0).length;
-            document.getElementById('lowStockItems').textContent = inventory.filter(i => (i.qty !== undefined ? i.qty : 1) === 0).length;
+            document.getElementById('onlineItems').textContent = inventory.filter(i => (parseInt(i.qty) || 0) > 0).length;
+            document.getElementById('lowStockItems').textContent = inventory.filter(i => (parseInt(i.qty) || 0) <= 0).length;
         }
 
         window.openModal = function(modalId) {
@@ -846,9 +898,10 @@
             }, 3500);
         };
 
+        // Listeners
         searchInput.addEventListener('input', renderTable);
         categoryFilter.addEventListener('change', renderTable);
-        statusFilter.addEventListener('change', renderTable);
+        modelFilter.addEventListener('change', renderTable); // Nuovo listener
         form.addEventListener('submit', saveItem);
     </script>
 </body>
