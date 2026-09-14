@@ -9,6 +9,8 @@
     <!-- Phosphor Icons -->
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <!-- Libreria QR Code per le etichette termiche -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -377,7 +379,7 @@
                 <div class="mt-6 sm:mt-8 pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-end gap-3 shrink-0">
                     <button type="button" onclick="closeModal('addModal')" class="w-full sm:w-auto px-5 py-3 sm:py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold text-sm transition-colors text-center order-2 sm:order-1 border border-slate-200 sm:border-transparent">Annulla</button>
                     <button type="submit" class="w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold text-sm transition-all shadow-md shadow-slate-900/10 flex items-center justify-center gap-2 order-1 sm:order-2">
-                        <i class="ph ph-floppy-disk text-lg"></i> Salva nel Database
+                        <i class="ph ph-printer text-lg"></i> Carica e Stampa Etichetta
                     </button>
                 </div>
             </form>
@@ -541,7 +543,6 @@
 
         // Funzione per estrarre tutti i modelli univoci dal DB e popolare i menu a tendina
         function updateModelDropdowns() {
-            // Estrae il campo 'model' (oppure combina brand+model se ci sono vecchi dati)
             const allModels = inventory.map(i => {
                 if(i.model) return i.model;
                 if(i.brand && i.years) return `${i.brand} ${i.years}`;
@@ -550,13 +551,11 @@
 
             const uniqueModels = [...new Set(allModels)].sort();
 
-            // Aggiorna tendina Filtro tabella
             const currentFilterVal = modelFilter.value;
             modelFilter.innerHTML = '<option value="">Tutti i Modelli</option>' + 
                 uniqueModels.map(m => `<option value="${m}">${m}</option>`).join('');
-            modelFilter.value = currentFilterVal; // Mantiene la selezione se aggiornata
+            modelFilter.value = currentFilterVal;
 
-            // Aggiorna il Datalist (suggerimenti di scrittura) nel form di inserimento
             const dataList = document.getElementById('modelSuggestions');
             dataList.innerHTML = uniqueModels.map(m => `<option value="${m}">`).join('');
         }
@@ -567,7 +566,6 @@
             document.getElementById('historyView').classList.add('hidden');
             document.getElementById('historyView').classList.remove('flex-col');
             
-            // Auto close mobile menu
             if(window.innerWidth < 768) toggleMobileMenu();
 
             document.querySelectorAll('.nav-item').forEach(el => {
@@ -600,7 +598,6 @@
             const filteredInventory = inventory.filter(item => {
                 const code = item.code || '';
                 const name = item.name || '';
-                // Gestione retrocompatibilità per vecchi dati senza 'model' unificato
                 const vehicleModel = item.model || `${item.brand || ''} ${item.years || ''}`.trim();
                 
                 let itemCategoryForFilter = item.cat === 'ruote' ? 'meccanica' : item.cat;
@@ -741,6 +738,46 @@
             reader.readAsDataURL(file);
         });
 
+        // Funzione per stampare l'etichetta termica ristretta con Marca, Modello, Pezzo e QR code
+        function stampaEtichettaRistretta(item) {
+            const printWindow = window.open('', '', 'width=400,height=300');
+            
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 0; padding: 4px; width: 48mm; }
+                            .label-box { text-align: center; }
+                            h3 { margin: 0 0 2px 0; font-size: 13px; text-transform: uppercase; }
+                            p { margin: 2px 0; font-size: 12px; font-weight: bold; }
+                            #qrcode-container { margin: 4px auto; display: flex; justify-content: center; }
+                        </style>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+                    </head>
+                    <body>
+                        <div class="label-box">
+                            <h3>${item.model}</h3>
+                            <p>${item.name}</p>
+                            <div id="qrcode-container"></div>
+                        </div>
+                        <script>
+                            new QRCode(document.getElementById("qrcode-container"), {
+                                text: "${item.id}",
+                                width: 55,
+                                height: 55
+                            });
+                            
+                            setTimeout(() => {
+                                window.print();
+                                window.close();
+                            }, 250);
+                        </script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
         window.saveItem = async function(e) {
             if(e) e.preventDefault();
             if(!db) return;
@@ -755,24 +792,31 @@
             const itemData = {
                 code: document.getElementById('itemCode').value.toUpperCase(),
                 name: document.getElementById('itemName').value,
-                model: document.getElementById('itemModel').value, // <-- IL NUOVO FILTRO UNICO!
+                model: document.getElementById('itemModel').value,
                 price: parseFloat(document.getElementById('itemPrice').value),
                 qty: parseInt(document.getElementById('itemQty').value),
                 cat: document.getElementById('itemCategory').value,
                 cond: document.getElementById('itemCondition').value,
                 desc: document.getElementById('itemDesc').value,
                 image: finalImage
-                // Non salviamo più brand e years separatamente per evitare conflitti, 
-                // tutto risiede nel campo "model" esattamente come chiede il nuovo sito.
             };
 
             try {
+                let savedId = id;
                 if (id) {
                     await setDoc(doc(db, 'ricambi', id), itemData, { merge: true });
                     showToast('Modifiche salvate con successo');
                 } else {
-                    await addDoc(collection(db, 'ricambi'), itemData);
+                    const docRef = await addDoc(collection(db, 'ricambi'), itemData);
+                    savedId = docRef.id;
                     showToast('Nuovo ricambio aggiunto al sito!');
+                    
+                    // Stampa l'etichetta termica automaticamente solo quando si inserisce un nuovo pezzo
+                    stampaEtichettaRistretta({
+                        id: savedId,
+                        name: itemData.name,
+                        model: itemData.model
+                    });
                 }
                 closeModal('addModal');
             } catch(err) {
@@ -791,7 +835,6 @@
             document.getElementById('itemCategory').value = item.cat === 'ruote' ? 'meccanica' : (item.cat || '');
             document.getElementById('itemName').value = item.name || '';
             
-            // Retrocompatibilità se l'articolo è vecchio e aveva brand/years divisi
             const modelVal = item.model || `${item.brand || ''} ${item.years || ''}`.trim();
             document.getElementById('itemModel').value = modelVal;
             
@@ -823,10 +866,8 @@
                 try {
                     const newQty = currentQty - 1;
                     
-                    // 1. Aggiorna la quantità nel database (se va a 0, scompare dal sito in automatico)
                     await setDoc(doc(db, 'ricambi', id), { qty: newQty }, { merge: true });
                     
-                    // 2. Registra la vendita nello storico contabile
                     await addDoc(collection(db, 'sales_history'), {
                         itemId: item.id,
                         itemCode: item.code || '-',
@@ -901,7 +942,7 @@
         // Listeners
         searchInput.addEventListener('input', renderTable);
         categoryFilter.addEventListener('change', renderTable);
-        modelFilter.addEventListener('change', renderTable); // Nuovo listener
+        modelFilter.addEventListener('change', renderTable);
         form.addEventListener('submit', saveItem);
     </script>
 </body>
