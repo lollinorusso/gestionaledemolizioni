@@ -3,393 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pannello Inventario Demolizioni - Gestione & E-commerce</title>
+    <title>DemolizioniGest - Autodemolizioni Limardi</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Phosphor Icons -->
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
-    <!-- Libreria QR Code per le etichette termiche -->
+    <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        /* Custom Scrollbar for better mobile feel */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen flex flex-col md:flex-row overflow-hidden">
 
-    <!-- Login/Role Selection Overlay -->
+    <!-- Login Overlay -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[100] flex flex-col items-center justify-center p-4">
-        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full border border-slate-100 animate-in fade-in zoom-in duration-300">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full border border-slate-100">
             <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner">
                 <i class="ph-fill ph-car-profile text-3xl"></i>
             </div>
             <h2 class="text-2xl font-bold text-slate-900 text-center tracking-tight mb-1">Demolizioni<span class="text-amber-500">Gest</span></h2>
             <p class="text-slate-500 text-sm text-center mb-6">Seleziona il tuo profilo di accesso.</p>
             
-            <!-- Tab switchers -->
             <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
-                <button type="button" onclick="switchLoginTab('admin')" id="tabAdmin" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition-all">Admin</button>
-                <button type="button" onclick="switchLoginTab('employee')" id="tabEmployee" class="flex-1 py-2 text-sm font-medium rounded-lg text-slate-500 hover:text-slate-900 transition-all">Dipendente</button>
+                <button type="button" onclick="switchTab('admin')" id="tabAdmin" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition-all">Admin</button>
+                <button type="button" onclick="switchTab('employee')" id="tabEmployee" class="flex-1 py-2 text-sm font-medium rounded-lg text-slate-500 hover:text-slate-900 transition-all">Dipendente</button>
             </div>
 
-            <!-- Admin Form -->
-            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <div>
-                    <div class="relative">
-                        <i class="ph ph-lock-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="password" id="adminPasswordInput" required placeholder="Password Amministratore" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-sm font-medium">
-                    </div>
+            <form id="adminForm" onsubmit="handleLogin(event, 'admin')" class="space-y-4">
+                <div class="relative">
+                    <i class="ph ph-lock-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                    <input type="password" id="adminPwd" required placeholder="Password Amministratore" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
                 </div>
-                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-3.5 rounded-xl font-semibold transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2">
-                    <i class="ph ph-shield-check text-xl"></i> Accedi
-                </button>
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-3.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"><i class="ph ph-shield-check text-xl"></i> Accedi</button>
             </form>
 
-            <!-- Employee Form -->
-            <form id="employeeLoginForm" onsubmit="handleEmployeeLogin(event)" class="space-y-4 hidden">
-                <div>
-                    <div class="relative">
-                        <i class="ph ph-user-circle absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="text" id="employeeNameInput" required placeholder="Nome Dipendente (Es. Marco)" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-sm font-medium">
-                    </div>
+            <form id="employeeForm" onsubmit="handleLogin(event, 'employee')" class="space-y-4 hidden">
+                <div class="relative">
+                    <i class="ph ph-user-circle absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                    <input type="text" id="employeeName" required placeholder="Nome Dipendente" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
                 </div>
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 p-3.5 rounded-xl font-semibold transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2">
-                    <i class="ph ph-wrench text-xl"></i> Entra in Officina
-                </button>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 p-3.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"><i class="ph ph-wrench text-xl"></i> Entra</button>
             </form>
         </div>
     </div>
 
-    <!-- Mobile Header Bar -->
-    <div class="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between z-40 shrink-0 shadow-md relative">
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between z-40 shadow-md">
         <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 bg-amber-500 text-slate-950 rounded-lg flex items-center justify-center font-bold text-sm">
-                <i class="ph-fill ph-car-profile"></i>
-            </div>
+            <div class="w-8 h-8 bg-amber-500 text-slate-950 rounded-lg flex items-center justify-center font-bold text-sm"><i class="ph-fill ph-car-profile"></i></div>
             <span class="font-bold text-base tracking-tight">Demolizioni<span class="text-amber-500">Gest</span></span>
         </div>
-        <button onclick="toggleMobileMenu()" class="p-2 text-slate-300 hover:text-white rounded-lg focus:outline-none">
-            <i class="ph ph-list text-2xl" id="mobileMenuIcon"></i>
-        </button>
+        <button onclick="toggleMenu()" class="p-2 text-slate-300 hover:text-white rounded-lg"><i class="ph ph-list text-2xl"></i></button>
     </div>
 
-    <!-- Sidebar Navigation -->
-    <aside id="sidebarNav" class="fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 md:static w-64 lg:w-72 bg-slate-900 text-white flex flex-col transition-transform duration-300 shadow-2xl z-50 md:z-auto pt-14 md:pt-0">
-        <!-- Close button for mobile inside sidebar -->
-        <button onclick="toggleMobileMenu()" class="md:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-white">
-            <i class="ph ph-x text-2xl"></i>
-        </button>
-
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 md:static w-64 lg:w-72 bg-slate-900 text-white flex flex-col transition-transform duration-300 shadow-2xl z-50 md:z-auto pt-14 md:pt-0">
+        <button onclick="toggleMenu()" class="md:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-white"><i class="ph ph-x text-2xl"></i></button>
         <div class="p-6 border-b border-slate-800 hidden md:flex items-center gap-3">
-            <div class="w-10 h-10 bg-amber-500 text-slate-950 rounded-xl flex items-center justify-center shadow-md font-bold">
-                <i class="ph-fill ph-car-profile text-2xl"></i>
-            </div>
+            <div class="w-10 h-10 bg-amber-500 text-slate-950 rounded-xl flex items-center justify-center font-bold"><i class="ph-fill ph-car-profile text-2xl"></i></div>
             <div>
                 <h1 class="font-bold text-lg leading-tight tracking-tight">Demolizioni<span class="text-amber-500">Gest</span></h1>
-                <p class="text-xs text-slate-400 font-medium">Magazzino & E-commerce</p>
+                <p class="text-xs text-slate-400 font-medium">Magazzino & Logistica</p>
             </div>
         </div>
-
-        <nav class="flex-1 p-4 space-y-2 overflow-y-auto mt-2 md:mt-0">
-            <a href="#" onclick="switchView('inventory')" id="nav-inventory" class="nav-item flex items-center gap-3 px-4 py-3.5 md:py-3 bg-amber-500 text-slate-950 rounded-xl font-semibold transition-all shadow-sm">
-                <i class="ph ph-package text-xl"></i>
-                Gestione Inventario
-            </a>
-            <a href="https://lollinorusso.github.io/autodemolizionilimardi/" target="_blank" class="nav-item flex items-center gap-3 px-4 py-3.5 md:py-3 text-slate-400 hover:bg-slate-800/60 hover:text-white rounded-xl font-medium transition-all">
-                <i class="ph ph-globe text-xl"></i>
-                Sito E-commerce
-            </a>
-            <a href="#" onclick="switchView('history')" id="nav-history" class="nav-item hidden items-center gap-3 px-4 py-3.5 md:py-3 text-slate-400 hover:bg-slate-800/60 hover:text-white rounded-xl font-medium transition-all">
-                <i class="ph ph-chart-line-up text-xl"></i>
-                Statistiche e Storico
-            </a>
+        <nav class="flex-1 p-4 space-y-2 mt-2 md:mt-0">
+            <button onclick="navTo('inventory')" id="nav-inventory" class="w-full flex items-center gap-3 px-4 py-3 bg-amber-500 text-slate-950 rounded-xl font-semibold transition-all"><i class="ph ph-package text-xl"></i> Inventario</button>
+            <button onclick="navTo('history')" id="nav-history" class="w-full hidden items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl font-medium transition-all"><i class="ph ph-chart-line-up text-xl"></i> Storico Vendite</button>
+            <a href="https://lollinorusso.github.io/autodemolizionilimardi/" target="_blank" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl font-medium transition-all"><i class="ph ph-globe text-xl"></i> Sito Pubblico</a>
         </nav>
-
-        <div class="p-4 border-t border-slate-800 bg-slate-950/40">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400 shrink-0 font-bold shadow-inner">
-                        <i class="ph ph-user text-lg"></i>
-                    </div>
-                    <div class="text-sm truncate">
-                        <p class="font-semibold text-slate-200 truncate" id="currentUserDisplay">In attesa...</p>
-                        <p class="text-xs text-slate-400 flex items-center gap-1 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span id="currentUserRoleBadge">Offline</span></p>
-                    </div>
+        <div class="p-4 border-t border-slate-800 bg-slate-950/40 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-amber-400"><i class="ph ph-user text-lg"></i></div>
+                <div>
+                    <p class="font-semibold text-slate-200 text-sm" id="userDisplay">Offline</p>
+                    <p class="text-xs text-slate-400" id="roleDisplay">In attesa</p>
                 </div>
-                <button onclick="logout()" class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors" title="Esci">
-                    <i class="ph ph-sign-out text-lg"></i>
-                </button>
             </div>
+            <button onclick="logout()" class="p-2 text-slate-400 hover:text-red-400 rounded-lg"><i class="ph ph-sign-out text-lg"></i></button>
         </div>
     </aside>
+    <div id="mobileOverlay" onclick="toggleMenu()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
 
-    <!-- Overlay scuro per chiudere il menu mobile cliccando fuori -->
-    <div id="mobileMenuOverlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
-
-    <main class="flex-1 flex flex-col h-[calc(100vh-56px)] md:h-full overflow-hidden bg-slate-100 relative">
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-[calc(100vh-56px)] md:h-full bg-slate-100 relative">
         
         <!-- INVENTORY VIEW -->
         <div id="inventoryView" class="flex flex-col h-full w-full">
-            <header class="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 sm:py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 z-10 shadow-xs shrink-0">
+            <!-- Barra Scanner Rapido -->
+            <div class="bg-slate-900 p-4 shrink-0 shadow-md z-20 flex items-center gap-4 border-b-4 border-amber-500">
+                <div class="bg-amber-500 text-slate-900 p-2.5 rounded-lg shrink-0">
+                    <i class="ph-bold ph-barcode text-2xl"></i>
+                </div>
+                <input type="text" id="fastScanner" autofocus placeholder="SPARA QUI IL QR CODE DEL PEZZO PER SCARICARLO..." class="w-full bg-slate-800 text-white border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-amber-500 outline-none font-mono text-sm tracking-wider uppercase placeholder:text-slate-500">
+            </div>
+
+            <header class="bg-white px-4 sm:px-8 py-4 flex justify-between items-center z-10 shadow-sm shrink-0">
                 <div>
-                    <h2 class="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Catalogo Ricambi</h2>
-                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Gestisci i pezzi e aggiorna il sito in tempo reale</p>
+                    <h2 class="text-xl font-bold text-slate-900 tracking-tight">Catalogo Ricambi</h2>
                 </div>
-                <div class="w-full sm:w-auto">
-                    <button onclick="openModal('addModal')" class="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-md shadow-amber-500/15 active:scale-95 text-sm sm:text-base">
-                        <i class="ph ph-plus-circle text-lg"></i>
-                        Aggiungi Nuovo Pezzo
-                    </button>
-                </div>
+                <button onclick="openModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 text-sm shadow-md">
+                    <i class="ph ph-plus-circle text-lg"></i> Aggiungi
+                </button>
             </header>
 
-            <div class="p-4 sm:p-6 bg-white border-b border-slate-200 shadow-2xs shrink-0">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div class="sm:col-span-2 relative">
-                        <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="text" id="searchInput" placeholder="Cerca Nome, Codice OEM..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
+            <div class="p-4 sm:p-6 bg-white border-b border-slate-200 shrink-0">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="relative sm:col-span-1">
+                        <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" placeholder="Cerca..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
                     </div>
-                    
-                    <!-- Nuovo Filtro Modello Dinamico -->
-                    <div>
-                        <select id="modelFilter" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium truncate">
-                            <option value="">Tutti i Modelli</option>
-                            <!-- Popolato da JS -->
-                        </select>
-                    </div>
+                    <select id="modelFilter" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"><option value="">Tutti i Modelli</option></select>
+                    <select id="catFilter" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                        <option value="">Tutte Categorie</option>
+                        <option value="motore">Motore</option>
+                        <option value="carrozzeria">Carrozzeria</option>
+                        <option value="elettrico">Elettronica</option>
+                        <option value="meccanica">Meccanica</option>
+                        <option value="interni">Interni</option>
+                    </select>
+                </div>
+            </div>
 
+            <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left min-w-[700px]">
+                            <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="py-3 px-4">Codice</th>
+                                    <th class="py-3 px-4">Modello & Nome</th>
+                                    <th class="py-3 px-4 text-center">Q.tà</th>
+                                    <th class="py-3 px-4 text-right">Prezzo</th>
+                                    <th class="py-3 px-4 text-center">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY VIEW -->
+        <div id="historyView" class="hidden flex-col h-full w-full">
+            <header class="bg-white px-4 sm:px-8 py-4 flex justify-between items-center shadow-sm shrink-0">
+                <h2 class="text-xl font-bold text-slate-900 tracking-tight">Storico Vendite</h2>
+                <button onclick="clearHistory()" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-semibold text-xs border border-red-200"><i class="ph ph-trash"></i> Svuota</button>
+            </header>
+            <div class="p-4 flex-1 overflow-y-auto">
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <p class="text-xs text-slate-400 font-bold uppercase">Incasso Totale</p>
+                        <h3 class="text-2xl font-bold text-slate-900 mt-1" id="totalRev">€0.00</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <p class="text-xs text-slate-400 font-bold uppercase">Pezzi Venduti</p>
+                        <h3 class="text-2xl font-bold text-slate-900 mt-1" id="totalSold">0</h3>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table class="w-full text-left min-w-[500px]">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="py-3 px-4">Data</th>
+                                <th class="py-3 px-4">Articolo</th>
+                                <th class="py-3 px-4">Venditore</th>
+                                <th class="py-3 px-4 text-right">Incasso</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Form -->
+    <div id="modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-slate-100">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-900" id="modalTitle">Nuovo Ricambio</h3>
+                <button onclick="closeModal()" class="p-2 text-slate-400 hover:bg-slate-100 rounded-lg"><i class="ph ph-x text-lg"></i></button>
+            </div>
+            <form id="itemForm" onsubmit="saveItem(event)" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <input type="hidden" id="itemId">
+                
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
+                    <label class="block text-xs font-bold text-amber-700 mb-1">Modello Veicolo (Filtro Unico)*</label>
+                    <input type="text" id="iModel" list="modelList" required class="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm font-semibold" placeholder="Es: Fiat Panda (2012-2020)">
+                    <datalist id="modelList"></datalist>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <select id="categoryFilter" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
-                            <option value="">Tutte le Categorie</option>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Nome Pezzo*</label>
+                        <input type="text" id="iName" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Codice OEM</label>
+                        <input type="text" id="iCode" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm uppercase">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-3 sm:col-span-1">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Categoria*</label>
+                        <select id="iCat" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm">
                             <option value="motore">Motore</option>
                             <option value="carrozzeria">Carrozzeria</option>
                             <option value="elettrico">Elettronica</option>
                             <option value="meccanica">Meccanica</option>
-                            <option value="interni">Abitacolo</option>
-                            <option value="moto">Moto</option>
+                            <option value="interni">Interni</option>
                         </select>
                     </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Prezzo (€)*</label>
+                        <input type="number" step="0.01" id="iPrice" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Quantità*</label>
+                        <input type="number" id="iQty" value="1" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm">
+                    </div>
                 </div>
                 
-                <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-4 pt-4 border-t border-slate-100 text-[11px] sm:text-xs font-semibold">
-                    <span class="flex items-center gap-1.5 bg-slate-100 text-slate-700 px-2.5 py-1.5 rounded-lg"><i class="ph ph-package text-sm text-slate-500"></i> Totale: <strong id="totalItems" class="text-slate-900 text-sm">0</strong></span>
-                    <span class="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2.5 py-1.5 rounded-lg"><i class="ph ph-globe text-sm text-blue-500"></i> Online: <strong id="onlineItems" class="text-blue-900 text-sm">0</strong></span>
-                    <span class="flex items-center gap-1.5 bg-red-50 text-red-700 px-2.5 py-1.5 rounded-lg"><i class="ph ph-warning-circle text-sm text-red-500"></i> Esauriti: <strong id="lowStockItems" class="text-red-900 text-sm">0</strong></span>
-                </div>
-            </div>
-
-            <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-                    <div class="overflow-x-auto hide-scroll sm:custom-scrollbar">
-                        <table class="w-full text-left border-collapse min-w-[800px]">
-                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px] sm:text-xs font-bold">
-                                <tr>
-                                    <th class="py-3 px-4">Codice OEM</th>
-                                    <th class="py-3 px-4">Foto</th>
-                                    <th class="py-3 px-4">Ricambio</th>
-                                    <th class="py-3 px-4">Modello Veicolo</th>
-                                    <th class="py-3 px-4">Categoria</th>
-                                    <th class="py-3 px-4 text-center">Q.tà</th>
-                                    <th class="py-3 px-4 text-right">Prezzo</th>
-                                    <th class="py-3 px-4 text-center">Sito</th>
-                                    <th class="py-3 px-4 text-center">Azioni</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventoryTableBody" class="divide-y divide-slate-100 text-[13px] sm:text-sm">
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div id="emptyState" class="hidden flex-col items-center justify-center py-12 text-slate-400 text-center px-4">
-                        <div class="w-14 h-14 bg-slate-100 text-slate-300 rounded-2xl flex items-center justify-center mb-3">
-                            <i class="ph ph-package text-3xl"></i>
-                        </div>
-                        <p class="text-sm font-semibold text-slate-700">Nessun ricambio trovato</p>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Aggiungi un nuovo pezzo per iniziare a vendere sul sito.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- HISTORY VIEW (Admin Only) -->
-        <div id="historyView" class="hidden flex-col h-full w-full bg-slate-100 overflow-hidden">
-            <header class="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 sm:py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-xs shrink-0">
                 <div>
-                    <h2 class="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Storico Vendite</h2>
-                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Contabilità riservata amministratore</p>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Foto (Auto-compressa)</label>
+                    <input type="file" id="iFile" accept="image/*" class="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-amber-100 file:text-amber-700 cursor-pointer border border-slate-200 rounded-lg p-1">
                 </div>
-                <div class="w-full sm:w-auto">
-                    <button onclick="clearSalesHistory()" class="w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 border border-red-200 transition-all">
-                        <i class="ph ph-trash text-base"></i> Svuota Storico e Incassi
-                    </button>
-                </div>
-            </header>
-            
-            <div class="p-4 sm:p-6 flex-1 overflow-y-auto custom-scrollbar space-y-4 sm:space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-200/80 flex items-center gap-4">
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-xl sm:text-2xl shadow-inner shrink-0">
-                            <i class="ph-fill ph-wallet"></i>
-                        </div>
-                        <div>
-                            <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">Incasso Totale</p>
-                            <h3 class="text-xl sm:text-3xl font-extrabold text-slate-900 mt-0.5 sm:mt-1" id="totalRevenue">0.00</h3>
-                        </div>
-                    </div>
-                    <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-200/80 flex items-center gap-4">
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 text-xl sm:text-2xl shadow-inner shrink-0">
-                            <i class="ph-fill ph-shopping-bag"></i>
-                        </div>
-                        <div>
-                            <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">Pezzi Venduti</p>
-                            <h3 class="text-xl sm:text-3xl font-extrabold text-slate-900 mt-0.5 sm:mt-1" id="totalSoldItems">0</h3>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-                    <div class="p-3.5 sm:p-5 border-b border-slate-100 bg-slate-50/50">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2 text-[11px] sm:text-sm uppercase tracking-wider">
-                            <i class="ph ph-clock-counter-clockwise text-amber-500 text-lg"></i> Registro Operazioni
-                        </h3>
-                    </div>
-                    <div class="overflow-x-auto hide-scroll sm:custom-scrollbar">
-                        <table class="w-full text-left border-collapse min-w-[600px]">
-                            <thead class="bg-white border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px] sm:text-xs font-bold">
-                                <tr>
-                                    <th class="py-3 px-4">Data e Ora</th>
-                                    <th class="py-3 px-4">Modello / Ricambio</th>
-                                    <th class="py-3 px-4">Venduto Da</th>
-                                    <th class="py-3 px-4 text-right">Incasso</th>
-                                </tr>
-                            </thead>
-                            <tbody id="salesTableBody" class="divide-y divide-slate-100 bg-white text-[13px] sm:text-sm">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Modal Add/Edit Item -->
-    <div id="addModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden z-[100] flex items-center justify-center opacity-0 transition-opacity duration-300 p-3 sm:p-4">
-        <!-- Modificato w-full e padding per adattarsi meglio al mobile -->
-        <div class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col transform scale-95 transition-transform duration-300 border border-slate-100" id="modalContent">
-            
-            <div class="bg-white border-b border-slate-100 px-5 sm:px-8 py-4 flex justify-between items-center rounded-t-2xl sm:rounded-t-3xl shrink-0">
-                <div>
-                    <h3 class="text-base sm:text-xl font-bold text-slate-900 tracking-tight" id="modalTitle">Aggiungi Nuovo Ricambio</h3>
-                    <p class="text-[10px] sm:text-xs text-slate-500 mt-0.5">Sincronizzazione in tempo reale con il sito</p>
-                </div>
-                <button type="button" onclick="closeModal('addModal')" class="w-8 h-8 sm:w-10 sm:h-10 bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-500 rounded-xl flex items-center justify-center transition-colors">
-                    <i class="ph ph-x text-lg sm:text-xl"></i>
-                </button>
-            </div>
-
-            <form id="itemForm" class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8">
-                <input type="hidden" id="itemId">
                 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-                    <div class="lg:col-span-2 space-y-4 sm:space-y-5">
-                        
-                        <!-- IL NUOVO FILTRO UNICO DEL MODELLO -->
-                        <div class="bg-amber-50/50 p-4 rounded-2xl border border-amber-100">
-                            <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-700 mb-2">Modello Veicolo (Filtro Unico Sito)*</label>
-                            <p class="text-[10px] sm:text-xs text-slate-500 mb-2 leading-tight">Scrivi per intero Marca, Modello e Anni per raggruppare i pezzi correttamente sul sito web.</p>
-                            <input type="text" id="itemModel" list="modelSuggestions" required class="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-semibold text-slate-900 shadow-sm" placeholder="Es: Fiat Panda (2012-2020)">
-                            <!-- Datalist per suggerimenti automatici -->
-                            <datalist id="modelSuggestions"></datalist>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Nome Ricambio*</label>
-                                <input type="text" id="itemName" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium" placeholder="Es. Paraurti anteriore">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Codice OEM (Opzionale)</label>
-                                <input type="text" id="itemCode" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none uppercase font-mono text-sm font-semibold" placeholder="Es. OEM-123">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            <div class="col-span-2 sm:col-span-1">
-                                <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Categoria*</label>
-                                <select id="itemCategory" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
-                                    <option value="">Seleziona...</option>
-                                    <option value="motore">Motore</option>
-                                    <option value="carrozzeria">Carrozzeria</option>
-                                    <option value="elettrico">Elettronica</option>
-                                    <option value="meccanica">Meccanica</option>
-                                    <option value="interni">Abitacolo</option>
-                                    <option value="moto">Moto</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Prezzo (€)*</label>
-                                <input type="number" step="0.01" id="itemPrice" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium" placeholder="0.00">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Q.tà*</label>
-                                <input type="number" id="itemQty" value="1" min="0" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Descrizione Pubblica (Opzionale)</label>
-                            <textarea id="itemDesc" rows="2" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none resize-none text-sm font-medium" placeholder="Dettagli visibili ai clienti sul sito..."></textarea>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-4 sm:space-y-5 h-fit">
-                        <h4 class="font-bold text-slate-800 flex items-center gap-2 text-[11px] sm:text-xs uppercase tracking-wider border-b border-slate-200 pb-2">
-                            <i class="ph ph-warehouse text-amber-500 text-lg"></i> Info e Foto
-                        </h4>
-                        
-                        <div>
-                            <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Condizione</label>
-                            <select id="itemCondition" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm font-medium">
-                                <option value="Ottimo">Ottimo</option>
-                                <option value="Buono" selected>Buono (Usato)</option>
-                                <option value="Discreto">Discreto</option>
-                            </select>
-                        </div>
-
-                        <div class="p-3.5 bg-white border border-slate-200 rounded-xl shadow-2xs">
-                            <label class="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Foto dal Telefono/PC</label>
-                            <input type="file" id="imageFileInput" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer overflow-hidden">
-                            <p class="text-[10px] text-slate-400 mt-2">Viene compressa automaticamente per il sito.</p>
-                            <input type="hidden" id="itemImage">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-6 sm:mt-8 pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-end gap-3 shrink-0">
-                    <button type="button" onclick="closeModal('addModal')" class="w-full sm:w-auto px-5 py-3 sm:py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold text-sm transition-colors text-center order-2 sm:order-1 border border-slate-200 sm:border-transparent">Annulla</button>
-                    <button type="submit" class="w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold text-sm transition-all shadow-md shadow-slate-900/10 flex items-center justify-center gap-2 order-1 sm:order-2">
-                        <i class="ph ph-printer text-lg"></i> Carica e Stampa Etichetta
-                    </button>
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold text-sm">Annulla</button>
+                    <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-semibold text-sm flex items-center gap-2"><i class="ph ph-printer"></i> Salva e Stampa QR</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 z-[200] flex items-center gap-3 border border-slate-800 w-11/12 sm:w-auto max-w-sm">
-        <i class="ph-fill ph-check-circle text-2xl text-emerald-400" id="toastIcon"></i>
-        <span id="toastMsg" class="font-semibold text-sm leading-tight">Operazione completata</span>
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl transform translate-y-24 opacity-0 transition-all z-[200] flex items-center gap-3">
+        <i class="ph-fill ph-check-circle text-xl text-emerald-400" id="toastIcon"></i>
+        <span id="toastMsg" class="font-semibold text-sm">Fatto</span>
     </div>
 
     <script type="module">
@@ -397,553 +259,243 @@
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, addDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        const firebaseConfig = {
+        // Configurazione Firebase
+        const app = initializeApp({
             apiKey: "AIzaSyDMWLVIVhBXJqAKFlDhZPcac8gaJFUKq6Q",
             authDomain: "sito-samu.firebaseapp.com",
             projectId: "sito-samu",
-            storageBucket: "sito-samu.firebasestorage.app",
-            messagingSenderId: "644217371779",
-            appId: "1:644217371779:web:26d6ceb0b51df966d36fb6"
-        };
-        
-        let app, db, auth;
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-        } catch(e) {
-            console.error("Firebase init err:", e);
-        }
+            storageBucket: "sito-samu.firebasestorage.app"
+        });
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
+        // Stato App
         let inventory = [];
-        let salesHistory = [];
-        let currentUserRole = null; 
-        let currentUserName = null;
-        let compressedImageBase64 = "";
+        let storic = [];
+        let role = null;
+        let userName = null;
+        let base64Img = "";
 
-        const tableBody = document.getElementById('inventoryTableBody');
-        const salesTableBody = document.getElementById('salesTableBody');
-        const searchInput = document.getElementById('searchInput');
-        const categoryFilter = document.getElementById('categoryFilter');
-        const modelFilter = document.getElementById('modelFilter'); // Nuovo Filtro Modello
-        const form = document.getElementById('itemForm');
-
-        window.toggleMobileMenu = function() {
-            const sidebar = document.getElementById('sidebarNav');
-            const overlay = document.getElementById('mobileMenuOverlay');
-            sidebar.classList.toggle('-translate-x-full');
-            if(sidebar.classList.contains('-translate-x-full')) {
-                overlay.classList.add('hidden');
-            } else {
-                overlay.classList.remove('hidden');
-            }
+        // Metodi UI Base
+        window.switchTab = (t) => {
+            document.getElementById('adminForm').style.display = t === 'admin' ? 'block' : 'none';
+            document.getElementById('employeeForm').style.display = t === 'employee' ? 'block' : 'none';
+        };
+        window.toggleMenu = () => {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('mobileOverlay').classList.toggle('hidden');
+        };
+        window.navTo = (view) => {
+            document.getElementById('inventoryView').style.display = view === 'inventory' ? 'flex' : 'none';
+            document.getElementById('historyView').style.display = view === 'history' ? 'flex' : 'none';
+            if(window.innerWidth < 768) toggleMenu();
+        };
+        const showToast = (msg, err = false) => {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            document.getElementById('toastIcon').className = err ? "ph-fill ph-warning-circle text-xl text-red-400" : "ph-fill ph-check-circle text-xl text-emerald-400";
+            t.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => t.classList.add('translate-y-24', 'opacity-0'), 3000);
         };
 
-        window.switchLoginTab = function(type) {
-            const tabAdmin = document.getElementById('tabAdmin');
-            const tabEmployee = document.getElementById('tabEmployee');
-            const adminForm = document.getElementById('adminLoginForm');
-            const employeeForm = document.getElementById('employeeLoginForm');
-
-            if(type === 'admin') {
-                tabAdmin.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition-all";
-                tabEmployee.className = "flex-1 py-2 text-sm font-medium rounded-lg text-slate-500 hover:text-slate-900 transition-all";
-                adminForm.classList.remove('hidden');
-                employeeForm.classList.add('hidden');
-            } else {
-                tabEmployee.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition-all";
-                tabAdmin.className = "flex-1 py-2 text-sm font-medium rounded-lg text-slate-500 hover:text-slate-900 transition-all";
-                employeeForm.classList.remove('hidden');
-                adminForm.classList.add('hidden');
-            }
-        };
-
-        window.handleAdminLogin = async function(e) {
+        // Autenticazione
+        window.handleLogin = async (e, type) => {
             e.preventDefault();
-            const pwd = document.getElementById('adminPasswordInput').value;
-            if(pwd === 'limardi24') {
-                await selectRole('admin', 'Amministratore Principale');
-            } else {
-                showToast('Password amministratore non corretta!', 'red');
-            }
-        };
-
-        window.handleEmployeeLogin = async function(e) {
-            e.preventDefault();
-            const name = document.getElementById('employeeNameInput').value.trim();
-            if(name.length < 2) {
-                showToast('Inserisci un nome valido!', 'red');
-                return;
-            }
-            await selectRole('employee', name);
-        };
-
-        async function selectRole(role, name) {
-            currentUserRole = role;
-            currentUserName = name;
+            if(type === 'admin' && document.getElementById('adminPwd').value !== 'limardi24') return showToast('Password errata', true);
+            role = type;
+            userName = type === 'admin' ? 'Amministratore' : document.getElementById('employeeName').value;
             
-            document.getElementById('currentUserDisplay').textContent = name;
-            document.getElementById('currentUserRoleBadge').textContent = role === 'admin' ? 'Amministratore' : 'Dipendente Officina';
-            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('userDisplay').innerText = userName;
+            document.getElementById('roleDisplay').innerText = role === 'admin' ? 'Admin' : 'Meccanico';
+            if(role === 'admin') document.getElementById('nav-history').classList.replace('hidden', 'flex');
             
-            if(role === 'admin') {
-                document.getElementById('nav-history').classList.remove('hidden');
-                document.getElementById('nav-history').classList.add('flex');
-            } else {
-                document.getElementById('nav-history').classList.add('hidden');
-                document.getElementById('nav-history').classList.remove('flex');
-                if(!document.getElementById('historyView').classList.contains('hidden')) {
-                    switchView('inventory');
-                }
-            }
-
-            // Autenticazione Anonima su Firebase per scrivere
-            try {
-                await signInAnonymously(auth);
-                initFirebaseData();
-            } catch(error) {
-                console.error("Auth error", error);
-                showToast("Errore di connessione. Verifica le regole Firebase.", "red");
-            }
-        }
-
-        window.logout = function() {
-            currentUserRole = null;
-            currentUserName = null;
-            inventory = [];
-            salesHistory = [];
-            renderTable();
-            document.getElementById('adminPasswordInput').value = '';
-            document.getElementById('employeeNameInput').value = '';
-            document.getElementById('loginOverlay').classList.remove('hidden');
+            await signInAnonymously(auth);
+            initDB();
         };
+        window.logout = () => window.location.reload();
 
-        function initFirebaseData() {
-            if (!db) return;
-
-            // Ascolta collezione 'ricambi' per il sito principale
-            onSnapshot(collection(db, 'ricambi'), (snapshot) => {
-                inventory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                // Aggiorna i filtri dinamici dei modelli auto
-                updateModelDropdowns();
-
-                renderTable();
-                updateStats();
-            }, (error) => console.error("Inventory error", error));
-
-            if(currentUserRole === 'admin') {
-                onSnapshot(collection(db, 'sales_history'), (snapshot) => {
-                    salesHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    salesHistory.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                    renderSalesTable();
-                }, (error) => console.error("Sales error", error));
-            }
-        }
-
-        // Funzione per estrarre tutti i modelli univoci dal DB e popolare i menu a tendina
-        function updateModelDropdowns() {
-            const allModels = inventory.map(i => {
-                if(i.model) return i.model;
-                if(i.brand && i.years) return `${i.brand} ${i.years}`;
-                return null;
-            }).filter(Boolean);
-
-            const uniqueModels = [...new Set(allModels)].sort();
-
-            const currentFilterVal = modelFilter.value;
-            modelFilter.innerHTML = '<option value="">Tutti i Modelli</option>' + 
-                uniqueModels.map(m => `<option value="${m}">${m}</option>`).join('');
-            modelFilter.value = currentFilterVal;
-
-            const dataList = document.getElementById('modelSuggestions');
-            dataList.innerHTML = uniqueModels.map(m => `<option value="${m}">`).join('');
-        }
-
-        window.switchView = function(viewName) {
-            document.getElementById('inventoryView').classList.add('hidden');
-            document.getElementById('inventoryView').classList.remove('flex');
-            document.getElementById('historyView').classList.add('hidden');
-            document.getElementById('historyView').classList.remove('flex-col');
-            
-            if(window.innerWidth < 768) toggleMobileMenu();
-
-            document.querySelectorAll('.nav-item').forEach(el => {
-                if(!el.getAttribute('target')) {
-                    el.classList.remove('bg-amber-500', 'text-slate-950', 'font-semibold');
-                    el.classList.add('text-slate-400', 'font-medium');
-                }
+        // Database Init
+        const initDB = () => {
+            onSnapshot(collection(db, 'ricambi'), snap => {
+                inventory = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                updateModels(); renderInv();
             });
-
-            if(viewName === 'inventory') {
-                document.getElementById('inventoryView').classList.remove('hidden');
-                document.getElementById('inventoryView').classList.add('flex');
-                const nav = document.getElementById('nav-inventory');
-                nav.classList.add('bg-amber-500', 'text-slate-950', 'font-semibold');
-                nav.classList.remove('text-slate-400', 'font-medium');
-            } else if (viewName === 'history' && currentUserRole === 'admin') {
-                document.getElementById('historyView').classList.remove('hidden');
-                document.getElementById('historyView').classList.add('flex-col');
-                const nav = document.getElementById('nav-history');
-                nav.classList.add('bg-amber-500', 'text-slate-950', 'font-semibold');
-                nav.classList.remove('text-slate-400', 'font-medium');
-            }
+            onSnapshot(collection(db, 'sales_history'), snap => {
+                storic = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => b.timestamp?.seconds - a.timestamp?.seconds);
+                renderStoric();
+            });
         };
 
-        window.renderTable = function() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const category = categoryFilter.value;
-            const modelSearch = modelFilter.value;
+        const updateModels = () => {
+            const models = [...new Set(inventory.map(i => i.model).filter(Boolean))].sort();
+            document.getElementById('modelFilter').innerHTML = '<option value="">Tutti i Modelli</option>' + models.map(m => `<option value="${m}">${m}</option>`).join('');
+            document.getElementById('modelList').innerHTML = models.map(m => `<option value="${m}">`).join('');
+        };
 
-            const filteredInventory = inventory.filter(item => {
-                const code = item.code || '';
-                const name = item.name || '';
-                const vehicleModel = item.model || `${item.brand || ''} ${item.years || ''}`.trim();
-                
-                let itemCategoryForFilter = item.cat === 'ruote' ? 'meccanica' : item.cat;
-
-                const matchesSearch = code.toLowerCase().includes(searchTerm) || name.toLowerCase().includes(searchTerm);
-                const matchesCategory = category === '' || itemCategoryForFilter === category;
-                const matchesModel = modelSearch === '' || vehicleModel === modelSearch;
-                
-                return matchesSearch && matchesCategory && matchesModel;
-            });
-
-            tableBody.innerHTML = '';
+        // Render Tabelle
+        const renderInv = () => {
+            const s = document.getElementById('searchInput').value.toLowerCase();
+            const m = document.getElementById('modelFilter').value;
+            const c = document.getElementById('catFilter').value;
             
-            if (filteredInventory.length === 0 && inventory.length > 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
-                document.getElementById('emptyState').classList.add('flex');
-            } else {
-                document.getElementById('emptyState').classList.add('hidden');
-                document.getElementById('emptyState').classList.remove('flex');
-            }
-
-            filteredInventory.forEach(item => {
-                const qty = parseInt(item.qty) || 0;
-                const isOutOfStock = qty <= 0;
-                const rowClass = isOutOfStock ? 'bg-red-50/40 opacity-80' : 'hover:bg-slate-50/80';
-                
-                let onlineBadge = isOutOfStock ? 
-                    `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-red-100 text-red-700 whitespace-nowrap"><i class="ph-fill ph-x-circle"></i> Esaurito</span>` :
-                    `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-100 text-blue-700 whitespace-nowrap"><i class="ph-fill ph-globe"></i> Sul Sito</span>`;
-
-                const imgPlaceholder = `https://placehold.co/60x60/e2e8f0/475569?text=RIC`;
-                const imgSrc = item.image || imgPlaceholder;
-                const price = parseFloat(item.price) || 0;
-                const vehicleModelDisplay = item.model || `${item.brand || ''} ${item.years || ''}`.trim() || '-';
-                
-                let displayCat = item.cat || '-';
-                if(displayCat === 'ruote') displayCat = 'meccanica';
-
-                const deleteBtn = currentUserRole === 'admin' ? 
-                    `<button onclick="deleteItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Elimina definitivamente"><i class="ph ph-trash text-lg"></i></button>` : '';
-
-                const tr = document.createElement('tr');
-                tr.className = `border-b border-slate-100 transition-colors ${rowClass}`;
-                tr.innerHTML = `
-                    <td class="py-2.5 px-4"><span class="font-mono text-[11px] font-bold bg-slate-100 px-1.5 py-1 rounded text-slate-700 border border-slate-200/60 whitespace-nowrap">${item.code || '-'}</span></td>
-                    <td class="py-2.5 px-4"><img src="${imgSrc}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover border border-slate-200 bg-white shrink-0" onerror="this.src='${imgPlaceholder}'"></td>
-                    <td class="py-2.5 px-4 font-semibold text-slate-900">${item.name || '-'}</td>
-                    <td class="py-2.5 px-4 font-bold text-amber-700 text-[11px] sm:text-xs bg-amber-50/50 rounded whitespace-nowrap">${vehicleModelDisplay}</td>
-                    <td class="py-2.5 px-4 text-slate-600 font-medium whitespace-nowrap capitalize">${displayCat}</td>
-                    <td class="py-2.5 px-4 text-center"><span class="font-bold text-sm ${isOutOfStock ? 'text-red-600' : 'text-slate-900'}">${qty}</span></td>
-                    <td class="py-2.5 px-4 text-right font-bold text-slate-900 whitespace-nowrap">€${price.toFixed(2)}</td>
-                    <td class="py-2.5 px-4 text-center">${onlineBadge}</td>
-                    <td class="py-2.5 px-4">
-                        <div class="flex items-center justify-center gap-0.5">
-                            <button onclick="sellItem('${item.id}')" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Vendi 1 pezzo (-1 Q.tà)" ${isOutOfStock ? 'disabled class="opacity-40 cursor-not-allowed"' : ''}><i class="ph ph-currency-eur text-lg"></i></button>
-                            <button onclick="editItem('${item.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Modifica Articolo"><i class="ph ph-pencil-simple text-lg"></i></button>
-                            ${deleteBtn}
-                        </div>
+            const html = inventory.filter(i => 
+                (i.name?.toLowerCase().includes(s) || i.code?.toLowerCase().includes(s)) &&
+                (!m || i.model === m) && (!c || i.cat === c)
+            ).map(i => `
+                <tr class="border-b border-slate-100 ${i.qty<=0 ? 'bg-red-50/50' : 'hover:bg-slate-50'}">
+                    <td class="py-3 px-4"><span class="font-mono text-[10px] bg-slate-200 px-1.5 py-1 rounded">${i.code || '-'}</span></td>
+                    <td class="py-3 px-4 font-semibold">${i.name} <div class="text-[10px] text-amber-600">${i.model||'-'}</div></td>
+                    <td class="py-3 px-4 text-center font-bold ${i.qty<=0?'text-red-500':''}">${i.qty}</td>
+                    <td class="py-3 px-4 text-right font-bold">€${Number(i.price).toFixed(2)}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="sell('${i.id}')" class="p-1 text-emerald-600 hover:bg-emerald-100 rounded" ${i.qty<=0?'disabled opacity-50':''}><i class="ph ph-currency-eur text-lg"></i></button>
+                        <button onclick="edit('${i.id}')" class="p-1 text-blue-600 hover:bg-blue-100 rounded"><i class="ph ph-pencil-simple text-lg"></i></button>
+                        ${role==='admin' ? `<button onclick="del('${i.id}')" class="p-1 text-red-600 hover:bg-red-100 rounded"><i class="ph ph-trash text-lg"></i></button>` : ''}
                     </td>
-                `;
-                tableBody.appendChild(tr);
-            });
+                </tr>
+            `).join('');
+            document.getElementById('inventoryBody').innerHTML = html || '<tr><td colspan="5" class="text-center py-4 text-slate-400">Nessun ricambio.</td></tr>';
         };
 
-        function renderSalesTable() {
-            salesTableBody.innerHTML = '';
-            let totalRev = 0;
-
-            if (salesHistory.length === 0) {
-                 salesTableBody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 text-xs">Nessuna vendita registrata.</td></tr>`;
-            }
-
-            salesHistory.forEach(sale => {
-                let dateStr = 'N/D';
-                if(sale.timestamp) {
-                    const d = new Date(sale.timestamp.seconds * 1000);
-                    dateStr = d.toLocaleDateString('it-IT') + ' ' + d.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
-                }
-                const price = parseFloat(sale.price) || 0;
-                totalRev += price;
-                const modelDisplay = sale.itemModel || '-';
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80";
-                tr.innerHTML = `
-                    <td class="py-3 px-4 text-slate-500 font-medium whitespace-nowrap text-xs">${dateStr}</td>
-                    <td class="py-3 px-4 text-xs">
-                        <div class="font-bold text-slate-900">${sale.itemName}</div>
-                        <div class="text-[10px] text-amber-600 font-semibold">${modelDisplay}</div>
-                    </td>
-                    <td class="py-3 px-4 text-slate-700 font-medium whitespace-nowrap text-xs"><span class="inline-flex items-center gap-1"><i class="ph-fill ph-user-circle text-amber-500"></i> ${sale.soldBy || 'Sistema'}</span></td>
-                    <td class="py-3 px-4 font-bold text-emerald-600 text-right whitespace-nowrap text-sm">+ ${price.toFixed(2)}</td>
-                `;
-                salesTableBody.appendChild(tr);
-            });
-
-            document.getElementById('totalRevenue').textContent = `${totalRev.toFixed(2)}`;
-            document.getElementById('totalSoldItems').textContent = salesHistory.length;
-        }
-
-        window.clearSalesHistory = async function() {
-            if(currentUserRole !== 'admin') return;
-            if(confirm("Vuoi davvero azzerare lo storico delle vendite e gli incassi totali? L'operazione è irreversibile.")) {
-                try {
-                    const querySnapshot = await getDocs(collection(db, "sales_history"));
-                    for (let d of querySnapshot.docs) {
-                        await deleteDoc(doc(db, "sales_history", d.id));
-                    }
-                    showToast("Storico e incassi azzerati con successo!");
-                } catch(e) {
-                    console.error(e);
-                    showToast("Errore durante lo svuotamento.", "red");
-                }
-            }
+        const renderStoric = () => {
+            let tot = 0;
+            const html = storic.map(s => {
+                tot += Number(s.price);
+                const d = s.timestamp ? new Date(s.timestamp.seconds*1000).toLocaleString('it-IT') : '-';
+                return `<tr class="border-b border-slate-100 hover:bg-slate-50">
+                    <td class="py-3 px-4 text-xs">${d}</td>
+                    <td class="py-3 px-4 text-xs font-bold">${s.itemName} <div class="text-[10px] text-amber-600">${s.itemModel}</div></td>
+                    <td class="py-3 px-4 text-xs">${s.soldBy}</td>
+                    <td class="py-3 px-4 text-right text-emerald-600 font-bold">+€${Number(s.price).toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('historyBody').innerHTML = html;
+            document.getElementById('totalRev').innerText = `€${tot.toFixed(2)}`;
+            document.getElementById('totalSold').innerText = storic.length;
         };
 
-        // Compressione Immagine Automatica
-        document.getElementById("imageFileInput").addEventListener("change", function(e) {
+        // Compressione Immagine
+        document.getElementById('iFile').addEventListener('change', e => {
             const file = e.target.files[0];
-            if(!file) { compressedImageBase64 = ""; return; }
-            const reader = new FileReader();
-            reader.onload = function(event) {
+            if(!file) return base64Img = "";
+            const r = new FileReader();
+            r.onload = ev => {
                 const img = new Image();
-                img.onload = function() {
+                img.onload = () => {
                     const canvas = document.createElement("canvas");
-                    const MAX_WIDTH = 600; const MAX_HEIGHT = 600;
-                    let width = img.width; let height = img.height;
-                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
-                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
-                    canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0, width, height);
-                    compressedImageBase64 = canvas.toDataURL("image/jpeg", 0.7);
-                    showToast("Foto compressa e pronta!");
-                }
-                img.src = event.target.result;
-            }
-            reader.readAsDataURL(file);
+                    let w = img.width, h = img.height;
+                    if(w > 600) { h *= 600/w; w = 600; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                    base64Img = canvas.toDataURL("image/jpeg", 0.7);
+                };
+                img.src = ev.target.result;
+            };
+            r.readAsDataURL(file);
         });
 
-        // Funzione per stampare l'etichetta termica ristretta con Marca, Modello, Pezzo e QR code
-        function stampaEtichettaRistretta(item) {
-            const printWindow = window.open('', '', 'width=400,height=300');
-            
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 0; padding: 4px; width: 48mm; }
-                            .label-box { text-align: center; }
-                            h3 { margin: 0 0 2px 0; font-size: 13px; text-transform: uppercase; }
-                            p { margin: 2px 0; font-size: 12px; font-weight: bold; }
-                            #qrcode-container { margin: 4px auto; display: flex; justify-content: center; }
-                        </style>
-                        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
-                    </head>
-                    <body>
-                        <div class="label-box">
-                            <h3>${item.model}</h3>
-                            <p>${item.name}</p>
-                            <div id="qrcode-container"></div>
-                        </div>
-                        <script>
-                            new QRCode(document.getElementById("qrcode-container"), {
-                                text: "${item.id}",
-                                width: 55,
-                                height: 55
-                            });
-                            
-                            setTimeout(() => {
-                                window.print();
-                                window.close();
-                            }, 250);
-                        </script>
-                    </body>
-                </html>
+        // Funzione Stampa Etichetta
+        const printLabel = (item) => {
+            const w = window.open('', '', 'width=400,height=300');
+            w.document.write(`
+                <html><head><style>
+                    body { font-family: sans-serif; margin: 0; padding: 4px; width: 48mm; text-align: center;}
+                    h3 { margin: 0 0 2px 0; font-size: 13px; text-transform: uppercase; }
+                    p { margin: 2px 0; font-size: 12px; font-weight: bold; }
+                    #qr { margin: 4px auto; display: flex; justify-content: center; }
+                </style><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script></head>
+                <body>
+                    <h3>${item.model}</h3><p>${item.name}</p><div id="qr"></div>
+                    <script>
+                        new QRCode(document.getElementById("qr"), { text: "${item.id}", width: 55, height: 55 });
+                        setTimeout(() => { window.print(); window.close(); }, 300);
+                    <\/script>
+                </body></html>
             `);
-            printWindow.document.close();
-        }
+            w.document.close();
+        };
 
-        window.saveItem = async function(e) {
-            if(e) e.preventDefault();
-            if(!db) return;
-
+        // CRUD
+        window.saveItem = async (e) => {
+            e.preventDefault();
             const id = document.getElementById('itemId').value;
-            let finalImage = compressedImageBase64;
-            if (!finalImage && id) {
-                const existing = inventory.find(i => i.id === id);
-                if (existing) finalImage = existing.image || "";
-            }
-
-            const itemData = {
-                code: document.getElementById('itemCode').value.toUpperCase(),
-                name: document.getElementById('itemName').value,
-                model: document.getElementById('itemModel').value,
-                price: parseFloat(document.getElementById('itemPrice').value),
-                qty: parseInt(document.getElementById('itemQty').value),
-                cat: document.getElementById('itemCategory').value,
-                cond: document.getElementById('itemCondition').value,
-                desc: document.getElementById('itemDesc').value,
-                image: finalImage
+            const data = {
+                model: document.getElementById('iModel').value,
+                name: document.getElementById('iName').value,
+                code: document.getElementById('iCode').value.toUpperCase(),
+                cat: document.getElementById('iCat').value,
+                price: Number(document.getElementById('iPrice').value),
+                qty: Number(document.getElementById('iQty').value),
+                image: base64Img || (id ? inventory.find(i=>i.id===id)?.image : '')
             };
-
             try {
-                let savedId = id;
-                if (id) {
-                    await setDoc(doc(db, 'ricambi', id), itemData, { merge: true });
-                    showToast('Modifiche salvate con successo');
+                if(id) {
+                    await setDoc(doc(db, 'ricambi', id), data, {merge:true});
+                    showToast('Modificato');
                 } else {
-                    const docRef = await addDoc(collection(db, 'ricambi'), itemData);
-                    savedId = docRef.id;
-                    showToast('Nuovo ricambio aggiunto al sito!');
-                    
-                    // Stampa l'etichetta termica automaticamente solo quando si inserisce un nuovo pezzo
-                    stampaEtichettaRistretta({
-                        id: savedId,
-                        name: itemData.name,
-                        model: itemData.model
-                    });
+                    const ref = await addDoc(collection(db, 'ricambi'), data);
+                    showToast('Creato');
+                    printLabel({id: ref.id, model: data.model, name: data.name}); // Stampa al volo
                 }
-                closeModal('addModal');
-            } catch(err) {
-                console.error(err);
-                showToast('Errore di scrittura su Firebase. Controlla le regole.', 'red');
+                closeModal();
+            } catch(e) { showToast('Errore Salvataggio', true); }
+        };
+
+        window.sell = async (id) => {
+            const item = inventory.find(i => i.id === id);
+            if(item && item.qty > 0) {
+                await setDoc(doc(db, 'ricambi', id), {qty: item.qty - 1}, {merge:true});
+                await addDoc(collection(db, 'sales_history'), {
+                    itemId: id, itemName: item.name, itemModel: item.model,
+                    price: item.price, soldBy: userName, timestamp: serverTimestamp()
+                });
+                showToast(`Pezzo venduto! (-1 Q.tà)`);
             }
         };
 
-        window.editItem = function(id) {
-            const item = inventory.find(i => i.id === id);
-            if (!item) return;
-
-            document.getElementById('modalTitle').textContent = 'Modifica Ricambio';
-            document.getElementById('itemId').value = item.id;
-            document.getElementById('itemCode').value = item.code || '';
-            document.getElementById('itemCategory').value = item.cat === 'ruote' ? 'meccanica' : (item.cat || '');
-            document.getElementById('itemName').value = item.name || '';
-            
-            const modelVal = item.model || `${item.brand || ''} ${item.years || ''}`.trim();
-            document.getElementById('itemModel').value = modelVal;
-            
-            document.getElementById('itemCondition').value = item.cond || 'Buono';
-            document.getElementById('itemPrice').value = item.price || 0;
-            document.getElementById('itemQty').value = item.qty !== undefined ? item.qty : 1;
-            document.getElementById('itemDesc').value = item.desc || '';
-            compressedImageBase64 = item.image || '';
-
-            openModal('addModal');
-        };
-
-        window.deleteItem = async function(id) {
-            if(!db || currentUserRole !== 'admin') return;
-            if(confirm("Sei sicuro di voler eliminare definitivamente questo articolo?")) {
-                try {
-                    await deleteDoc(doc(db, 'ricambi', id));
-                    showToast('Ricambio eliminato definitivamente', 'red');
-                } catch(e) { console.error(e); }
-            }
-        };
-
-        window.sellItem = async function(id) {
-            if(!db) return;
-            const item = inventory.find(i => i.id === id);
-            const currentQty = parseInt(item.qty) || 0;
-            
-            if (item && currentQty > 0) {
-                try {
-                    const newQty = currentQty - 1;
-                    
-                    await setDoc(doc(db, 'ricambi', id), { qty: newQty }, { merge: true });
-                    
-                    await addDoc(collection(db, 'sales_history'), {
-                        itemId: item.id,
-                        itemCode: item.code || '-',
-                        itemName: item.name,
-                        itemModel: item.model || `${item.brand || ''} ${item.years || ''}`.trim(),
-                        price: parseFloat(item.price),
-                        soldBy: currentUserName,
-                        timestamp: serverTimestamp()
-                    });
-
-                    if(newQty === 0) {
-                        showToast(`Venduto da ${currentUserName}! Pezzo Esaurito (Rimosso dal sito).`);
+        // GESTIONE PISTOLA SCANNER RAPIDA
+        document.getElementById('fastScanner').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') {
+                const scannedId = e.target.value.trim();
+                e.target.value = ''; // pulisci subito l'input
+                if(scannedId) {
+                    // Verifica se esiste l'ID letto dalla pistola
+                    const exist = inventory.find(i => i.id === scannedId);
+                    if(exist && exist.qty > 0) {
+                        sell(scannedId);
+                    } else if (exist && exist.qty <= 0) {
+                        showToast('Questo pezzo risulta già esaurito!', true);
                     } else {
-                        showToast(`Venduto 1 pezzo! Q.tà rimanente: ${newQty}`);
+                        showToast('QR Code non trovato in archivio.', true);
                     }
-                } catch(e) {
-                    console.error(e);
-                    showToast('Errore durante la registrazione della vendita', 'red');
                 }
             }
+        });
+
+        window.del = async (id) => confirm('Eliminare?') && await deleteDoc(doc(db, 'ricambi', id));
+        window.clearHistory = async () => {
+            if(role!=='admin' || !confirm('Svuotare tutto?')) return;
+            const s = await getDocs(collection(db, 'sales_history'));
+            s.forEach(d => deleteDoc(d.ref));
         };
 
-        function updateStats() {
-            document.getElementById('totalItems').textContent = inventory.length;
-            document.getElementById('onlineItems').textContent = inventory.filter(i => (parseInt(i.qty) || 0) > 0).length;
-            document.getElementById('lowStockItems').textContent = inventory.filter(i => (parseInt(i.qty) || 0) <= 0).length;
-        }
-
-        window.openModal = function(modalId) {
-            const modal = document.getElementById(modalId);
-            const content = document.getElementById('modalContent');
-            if (!document.getElementById('itemId').value) {
-                document.getElementById('modalTitle').textContent = 'Aggiungi Nuovo Ricambio';
-                form.reset();
-                document.getElementById('itemId').value = '';
-                compressedImageBase64 = "";
-            }
-            modal.classList.remove('hidden');
-            void modal.offsetWidth;
-            modal.classList.remove('opacity-0');
-            content.classList.remove('scale-95');
+        window.openModal = () => { document.getElementById('modal').style.display='flex'; document.getElementById('itemForm').reset(); document.getElementById('itemId').value=''; base64Img=''; };
+        window.closeModal = () => { document.getElementById('modal').style.display='none'; };
+        window.edit = (id) => {
+            const i = inventory.find(x => x.id === id);
+            openModal();
+            document.getElementById('itemId').value = id;
+            document.getElementById('iModel').value = i.model||'';
+            document.getElementById('iName').value = i.name||'';
+            document.getElementById('iCode').value = i.code||'';
+            document.getElementById('iCat').value = i.cat||'';
+            document.getElementById('iPrice').value = i.price||0;
+            document.getElementById('iQty').value = i.qty||0;
+            base64Img = i.image||'';
         };
 
-        window.closeModal = function(modalId) {
-            const modal = document.getElementById(modalId);
-            const content = document.getElementById('modalContent');
-            modal.classList.add('opacity-0');
-            content.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                form.reset();
-                document.getElementById('itemId').value = '';
-                compressedImageBase64 = "";
-            }, 300);
-        };
-
-        window.showToast = function(message, color = 'emerald') {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').textContent = message;
-            const icon = document.getElementById('toastIcon');
-            if(color === 'red') {
-                icon.className = "ph-fill ph-warning-circle text-2xl text-red-400";
-            } else {
-                icon.className = "ph-fill ph-check-circle text-2xl text-emerald-400";
-            }
-            toast.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-24', 'opacity-0');
-            }, 3500);
-        };
-
-        // Listeners
-        searchInput.addEventListener('input', renderTable);
-        categoryFilter.addEventListener('change', renderTable);
-        modelFilter.addEventListener('change', renderTable);
-        form.addEventListener('submit', saveItem);
+        ['searchInput', 'modelFilter', 'catFilter'].forEach(id => document.getElementById(id).addEventListener('input', renderInv));
     </script>
 </body>
 </html>
